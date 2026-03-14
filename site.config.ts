@@ -9,7 +9,7 @@ export const siteConfig = {
   author: "coin",
 
   /** 站点部署 URL（用于 RSS feed 等） */
-  url: "https://coin-blog.pages.dev",
+  url: "https://liaoguoyin.com",
 
   /** 站点语言 */
   lang: "zh-CN",
@@ -48,6 +48,6 @@ export const siteConfig = {
    */
   postListStyle: "twoLine" as "divided" | "twoLine" | "preview",
 
-  /** Memos API 地址 */
+  /** Memos API 地址(public memo only) */
   memosApiUrl: "https://memo.nas.hz.moyumomokan.cn",
 };
