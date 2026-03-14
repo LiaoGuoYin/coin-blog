@@ -9,6 +9,8 @@ pnpm dev        # Start dev server (port 4321)
 pnpm build      # Build static site to dist/
 pnpm preview    # Preview built output
 pnpm deploy     # Build + deploy to Cloudflare Pages
+
+bash scripts/check-drafts.sh  # 将 posts/ 下 published 非 true 的文章移入 posts/draft/
 ```
 
 Requires Node.js >= 22.12.0 and pnpm.
@@ -17,11 +19,11 @@ Requires Node.js >= 22.12.0 and pnpm.
 
 Astro 6 static blog deployed to Cloudflare Pages. Pure static output — no server runtime.
 
-**Content flow:** Markdown files in `content/posts/` → parsed by gray-matter (frontmatter) + markdown-it (body) → static HTML pages via Astro SSG. Memos are fetched client-side from an external Memos API.
+**Content flow:** Markdown files in `posts/` → parsed by gray-matter (frontmatter) + markdown-it (body) → static HTML pages via Astro SSG. Memos are fetched client-side from an external Memos API.
 
 **Routing:**
 - `/` and `/post` → homepage with post list (tab-switchable to Memos)
-- `/:slug` → article page (generated from `content/posts/*.md` filenames)
+- `/:slug` → article page (generated from `posts/*.md` filenames)
 - `/memo` → memos timeline
 - `/atom.xml` → RSS feed
 

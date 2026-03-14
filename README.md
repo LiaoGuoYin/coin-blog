@@ -58,7 +58,7 @@ pnpm dev
 
 ### 6. 写文章
 
-在 `content/posts/` 目录下新建 `.md` 文件：
+在 `posts/` 目录下新建 `.md` 文件：
 
 ```markdown
 ---
@@ -72,6 +72,7 @@ published: true
 
 - `published: true` 必须设为 `true` 文章才会显示
 - 文件名就是 URL 路径，比如 `hello-world.md` 对应 `/hello-world`
+- 运行 `bash scripts/check-drafts.sh` 可将未发布的文章自动移入 `posts/draft/`
 
 ### 7. 部署到 Cloudflare Pages
 

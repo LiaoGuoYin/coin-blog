@@ -9,7 +9,7 @@
 一个极简风格的个人博客，基于 Astro 静态站点生成器构建。核心特性：
 
 - **纯静态输出** — 构建产物为纯 HTML/CSS/JS，无服务器运行时
-- **Markdown 驱动** — 博客文章以 `.md` 文件存储在 `content/posts/` 目录
+- **Markdown 驱动** — 博客文章以 `.md` 文件存储在 `posts/` 目录
 - **Memos 集成** — 通过外部 Memos API 拉取短笔记/动态，客户端渲染
 - **双主题** — 支持 light/dark 模式，系统偏好感知 + 手动切换
 - **响应式布局** — 桌面端侧边栏 + 主内容区；移动端折叠头部 + 全宽内容
@@ -41,8 +41,7 @@
 
 ```
 coin-blog/
-├── content/
-│   └── posts/                   # Markdown 博客文章 (每篇一个 .md 文件)
+├── posts/                          # Markdown 博客文章 (每篇一个 .md 文件)
 ├── public/
 │   ├── avatar.png               # 站点头像 (也用作 favicon)
 │   ├── favicon.png
@@ -183,7 +182,7 @@ export default defineConfig({
 
 ### 6.1 博客文章 (Post)
 
-**存储位置**：`content/posts/*.md`
+**存储位置**：`posts/*.md`
 
 **Frontmatter 格式**：
 
@@ -215,7 +214,7 @@ interface Post extends PostMeta {
 
 **读取逻辑** (`src/lib/posts.ts`)：
 
-1. 读取 `content/posts/` 下所有 `.md` 文件
+1. 读取 `posts/` 下所有 `.md` 文件
 2. 用 `gray-matter` 解析 frontmatter
 3. 过滤 `published !== true` 的文章
 4. 按 `date` 降序排列（最新在前）

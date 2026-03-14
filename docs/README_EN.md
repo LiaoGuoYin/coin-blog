@@ -58,7 +58,7 @@ Open http://localhost:4321 in your browser.
 
 ### 6. Write Posts
 
-Create a `.md` file in `content/posts/`:
+Create a `.md` file in `posts/`:
 
 ```markdown
 ---
@@ -72,6 +72,7 @@ Your content here...
 
 - `published: true` is required for the post to appear
 - The filename becomes the URL path, e.g. `hello-world.md` → `/hello-world`
+- Run `bash scripts/check-drafts.sh` to move unpublished posts to `posts/draft/`
 
 ### 7. Deploy to Cloudflare Pages
 

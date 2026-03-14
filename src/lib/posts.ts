@@ -45,10 +45,10 @@ function readMarkdownFiles(dir: string, type: 'post'): Post[] {
     });
 }
 
-const CONTENT_DIR = path.resolve(process.cwd(), 'content');
+const POSTS_DIR = path.resolve(process.cwd(), 'posts');
 
 export function getAllPosts(): Post[] {
-  return readMarkdownFiles(path.join(CONTENT_DIR, 'posts'), 'post');
+  return readMarkdownFiles(POSTS_DIR, 'post');
 }
 
 /** Estimate reading time in minutes (Chinese ~300 chars/min, English ~200 words/min) */
