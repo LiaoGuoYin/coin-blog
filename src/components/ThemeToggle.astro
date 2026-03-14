@@ -17,7 +17,7 @@
       style="
         height: calc(100% - 4px);
         width: calc(33.333% - 2px);
-        background: white;
+        background: var(--sand-1);
         box-shadow: 0 1px 3px rgba(0,0,0,0.12);
         top: 2px;
         left: 2px;
@@ -83,9 +83,8 @@
 
     function updateIndicator(theme: string) {
       const index = themeMap[theme] ?? 2;
-      const pct = index * 33.333;
       if (indicator) {
-        (indicator as HTMLElement).style.transform = `translateX(${pct}%)`;
+        (indicator as HTMLElement).style.transform = `translateX(${index * 100}%)`;
       }
 
       // Update button text colors
