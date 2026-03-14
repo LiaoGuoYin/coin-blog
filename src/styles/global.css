@@ -228,9 +228,29 @@
   box-sizing: border-box;
 }
 
+/* Size-adjusted fallback fonts to prevent layout shift during web font loading */
+@font-face {
+  font-family: "Poppins Fallback";
+  src: local("Arial");
+  size-adjust: 110%;
+  ascent-override: 105%;
+  descent-override: 35%;
+  line-gap-override: 10%;
+}
+
+@font-face {
+  font-family: "Lora Fallback";
+  src: local("Georgia");
+  size-adjust: 97%;
+  ascent-override: 100%;
+  descent-override: 30%;
+  line-gap-override: 0%;
+}
+
 html {
   font-family:
     "Poppins",
+    "Poppins Fallback",
     system-ui,
     -apple-system,
     sans-serif;
@@ -304,9 +324,8 @@ body {
 
 /* ===== Prose font overrides (Claude-style: serif body + mono code) ===== */
 .prose {
-  font-family: "Lora", Georgia, "Times New Roman", serif;
+  font-family: "Lora", "Lora Fallback", Georgia, "Times New Roman", serif;
   font-size: 1.0625rem;
-  max-width: 68ch;
   line-height: 1.85;
   font-weight: 500;
 }
