@@ -22,6 +22,7 @@ export const siteConfig = {
     { href: "/post", label: "Post" },
     { href: "/memo", label: "Memo" },
     { href: "/atom.xml", label: "RSS", external: true },
+    { href: "https://github.com/LiaoGuoYin/coin-blog", label: "GitHub", external: true },
   ],
 
   /** UI 文案 */
