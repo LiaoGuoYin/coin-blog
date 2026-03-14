@@ -10,11 +10,11 @@ const posts = getAllPosts();
 const style = siteConfig.postListStyle;
 ---
 
-<Layout title="All Posts — Coin's Blog">
+<Layout title={`${siteConfig.ui.allPostsHeading} — ${siteConfig.title}`}>
   <div class="p-5 sm:p-8 flex flex-col gap-6">
     <section>
       <h2 class="text-base font-semibold mb-4" style="color: var(--bronze-12);">
-        All Posts
+        {siteConfig.ui.allPostsHeading}
       </h2>
       {posts.length > 0 ? (
         <>
@@ -23,7 +23,7 @@ const style = siteConfig.postListStyle;
           {style === 'preview' && <PostListPreview posts={posts} />}
         </>
       ) : (
-        <p class="text-sm" style="color: var(--sand-11);">No posts yet.</p>
+        <p class="text-sm" style="color: var(--sand-11);">{siteConfig.ui.noPosts}</p>
       )}
     </section>
   </div>

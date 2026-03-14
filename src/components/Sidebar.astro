@@ -1,17 +1,12 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
+import { siteConfig } from '../lib/config';
 
 interface Props {
   currentPath?: string;
 }
 
 const { currentPath = '/' } = Astro.props;
-
-const navLinks = [
-  { href: '/', label: 'Post' },
-  { href: '/memo', label: 'Memo' },
-  { href: '/atom.xml', label: 'RSS', external: true },
-];
 
 function isActive(href: string): boolean {
   if (href === '/') {
@@ -29,20 +24,20 @@ function isActive(href: string): boolean {
   <div class="flex items-center gap-2.5 py-6 px-2">
     <a href="/" class="shrink-0">
       <img
-        src="/avatar.svg"
-        alt="Coin's Blog"
+        src={siteConfig.avatar}
+        alt={siteConfig.title}
         class="w-10 h-10 rounded-full object-cover"
         style="box-shadow: 0 0 0 2px var(--sand-6);"
       />
     </a>
     <h1 class="text-sm font-semibold" style="color: var(--bronze-12);">
-      Coin's Blog
+      {siteConfig.title}
     </h1>
   </div>
 
   <!-- Navigation -->
   <nav class="flex flex-col gap-1 flex-1">
-    {navLinks.map((link) => {
+    {siteConfig.navLinks.map((link) => {
       const active = isActive(link.href);
       return (
         <a

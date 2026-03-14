@@ -1,15 +1,16 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { getAllMemos, formatDate } from '../../lib/posts';
+import { siteConfig } from '../../lib/config';
 
 const memos = getAllMemos();
 ---
 
-<Layout title="Memos — Coin's Blog">
+<Layout title={`${siteConfig.ui.memosHeading} — ${siteConfig.title}`}>
   <div class="p-5 sm:p-8 flex flex-col gap-6">
     <section>
       <h2 class="text-base font-semibold mb-4" style="color: var(--bronze-12);">
-        Memos
+        {siteConfig.ui.memosHeading}
       </h2>
       {memos.length > 0 ? (
         <div class="timeline">
@@ -27,7 +28,7 @@ const memos = getAllMemos();
           ))}
         </div>
       ) : (
-        <p class="text-sm" style="color: var(--sand-11);">No memos yet.</p>
+        <p class="text-sm" style="color: var(--sand-11);">{siteConfig.ui.noMemos}</p>
       )}
     </section>
   </div>

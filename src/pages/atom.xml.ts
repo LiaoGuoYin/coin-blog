@@ -1,9 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getAllPosts, getAllMemos } from '../lib/posts';
-
-const SITE_URL = 'https://coin-blog.pages.dev';
-const SITE_TITLE = "Coin's Blog";
-const SITE_AUTHOR = 'Coin';
+import { siteConfig } from '../lib/config';
 
 function escapeXml(str: string): string {
   return str
@@ -24,7 +21,7 @@ export const GET: APIRoute = () => {
   const updated = all.length > 0 ? new Date(all[0].date).toISOString() : new Date().toISOString();
 
   const entries = all.map((post) => {
-    const url = `${SITE_URL}/${post.slug}`;
+    const url = `${siteConfig.url}/${post.slug}`;
     const dateIso = post.date ? new Date(post.date).toISOString() : new Date().toISOString();
 
     return `  <entry>
@@ -34,7 +31,7 @@ export const GET: APIRoute = () => {
     <updated>${dateIso}</updated>
     <published>${dateIso}</published>
     <author>
-      <name>${escapeXml(SITE_AUTHOR)}</name>
+      <name>${escapeXml(siteConfig.author)}</name>
     </author>
     <content type="html">${escapeXml(post.content.slice(0, 2000))}</content>
   </entry>`;
@@ -42,13 +39,13 @@ export const GET: APIRoute = () => {
 
   const xml = `<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <id>${SITE_URL}/atom.xml</id>
-  <title>${escapeXml(SITE_TITLE)}</title>
-  <link href="${SITE_URL}" />
-  <link rel="self" href="${SITE_URL}/atom.xml" />
+  <id>${siteConfig.url}/atom.xml</id>
+  <title>${escapeXml(siteConfig.title)}</title>
+  <link href="${siteConfig.url}" />
+  <link rel="self" href="${siteConfig.url}/atom.xml" />
   <updated>${updated}</updated>
   <author>
-    <name>${escapeXml(SITE_AUTHOR)}</name>
+    <name>${escapeXml(siteConfig.author)}</name>
   </author>
 ${entries.join('\n')}
 </feed>`;

@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import { getAllPosts, getAllMemos, formatDate, estimateReadingTime } from '../lib/posts';
 import { renderMarkdown } from '../lib/markdown';
+import { siteConfig } from '../lib/config';
 import type { Post, PostMeta } from '../lib/posts';
 
 export async function getStaticPaths() {
@@ -31,22 +32,22 @@ interface Props {
 
 const { post, prev, next } = Astro.props;
 const { html: contentHtml, headings } = await renderMarkdown(post.content);
-const pageTitle = `${post.title} — Coin's Blog`;
+const pageTitle = `${post.title} — ${siteConfig.title}`;
 const readingTime = estimateReadingTime(post.content);
 ---
 
 <Layout title={pageTitle}>
-  <article class="post-article">
+  <article class="post-article" data-copy-label={siteConfig.ui.copyButton} data-copied-label={siteConfig.ui.copiedButton}>
     <!-- Post header -->
     <header class="post-header">
       <a
         href={post.type === 'memo' ? '/memo' : '/post'}
         class="post-back"
       >
-        ← {post.type === 'memo' ? 'Memos' : 'Posts'}
+        ← {post.type === 'memo' ? siteConfig.ui.memosHeading : siteConfig.ui.postsHeading}
       </a>
       <h1 class="post-title">{post.title}</h1>
-      <p class="post-date">{formatDate(post.date)} · 约 {readingTime} 分钟</p>
+      <p class="post-date">{formatDate(post.date)} · {siteConfig.ui.readingTime(readingTime)}</p>
     </header>
 
     <!-- Body: content + TOC -->
@@ -55,7 +56,7 @@ const readingTime = estimateReadingTime(post.content);
 
       {headings.length > 0 && (
         <nav class="post-toc">
-          <p class="toc-label">本文导览</p>
+          <p class="toc-label">{siteConfig.ui.tocLabel}</p>
           <div class="toc-list-wrapper">
             <div class="toc-progress" id="toc-progress"></div>
             <ul>
@@ -75,13 +76,13 @@ const readingTime = estimateReadingTime(post.content);
       <nav class="post-nav">
         {prev ? (
           <a href={`/${prev.slug}`} class="post-nav-link post-nav-prev">
-            <span class="post-nav-label">← 上一篇</span>
+            <span class="post-nav-label">{siteConfig.ui.prevPost}</span>
             <span class="post-nav-title">{prev.title}</span>
           </a>
         ) : <div />}
         {next ? (
           <a href={`/${next.slug}`} class="post-nav-link post-nav-next">
-            <span class="post-nav-label">下一篇 →</span>
+            <span class="post-nav-label">{siteConfig.ui.nextPost}</span>
             <span class="post-nav-title">{next.title}</span>
           </a>
         ) : <div />}
@@ -90,7 +91,7 @@ const readingTime = estimateReadingTime(post.content);
   </article>
 
   <!-- Back to top button -->
-  <button class="back-to-top" id="back-to-top" aria-label="返回顶部">↑</button>
+  <button class="back-to-top" id="back-to-top" aria-label={siteConfig.ui.backToTop}>↑</button>
 </Layout>
 
 <style>
@@ -444,6 +445,9 @@ const readingTime = estimateReadingTime(post.content);
   });
 
   // Code block copy buttons
+  const copyLabel = article?.getAttribute('data-copy-label') || 'Copy';
+  const copiedLabel = article?.getAttribute('data-copied-label') || 'Copied';
+
   document.querySelectorAll('.prose .shiki').forEach((block) => {
     const wrapper = document.createElement('div');
     wrapper.className = 'shiki-wrapper';
@@ -452,12 +456,12 @@ const readingTime = estimateReadingTime(post.content);
 
     const btn = document.createElement('button');
     btn.className = 'code-copy-btn';
-    btn.textContent = '复制';
+    btn.textContent = copyLabel;
     btn.addEventListener('click', async () => {
       const code = block.querySelector('code')?.textContent || '';
       await navigator.clipboard.writeText(code);
-      btn.textContent = '已复制';
-      setTimeout(() => { btn.textContent = '复制'; }, 1500);
+      btn.textContent = copiedLabel;
+      setTimeout(() => { btn.textContent = copyLabel; }, 1500);
     });
     wrapper.appendChild(btn);
   });

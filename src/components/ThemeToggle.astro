@@ -1,5 +1,6 @@
 ---
-// ThemeToggle - 3-tab pill switcher (Light / Dark / Auto)
+import { siteConfig } from '../lib/config';
+const { light, dark, system } = siteConfig.themeLabels;
 ---
 
 <div class="theme-toggle-wrap">
@@ -10,7 +11,7 @@
     role="group"
     aria-label="Theme"
   >
-    <!-- Sliding white indicator -->
+    <!-- Sliding indicator -->
     <div
       id="theme-indicator"
       class="absolute rounded-full transition-transform duration-150 ease-in-out"
@@ -30,21 +31,21 @@
       class="theme-btn relative z-10 px-3 py-1 rounded-full cursor-pointer border-0 bg-transparent"
       style="color: var(--sand-11);"
     >
-      Light
+      {light}
     </button>
     <button
       data-theme="dark"
       class="theme-btn relative z-10 px-3 py-1 rounded-full cursor-pointer border-0 bg-transparent"
       style="color: var(--sand-11);"
     >
-      Dark
+      {dark}
     </button>
     <button
       data-theme="system"
       class="theme-btn relative z-10 px-3 py-1 rounded-full cursor-pointer border-0 bg-transparent"
       style="color: var(--sand-11);"
     >
-      Auto
+      {system}
     </button>
   </div>
 </div>

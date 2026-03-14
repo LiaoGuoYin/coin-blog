@@ -10,11 +10,11 @@ const allPosts = getAllPosts();
 const style = siteConfig.postListStyle;
 ---
 
-<Layout title="Coin's Blog">
+<Layout title={siteConfig.title}>
   <div class="p-5 sm:p-8 flex flex-col gap-4">
     <section>
       <h2 class="text-base font-semibold mb-4" style="color: var(--bronze-12);">
-        Posts
+        {siteConfig.ui.postsHeading}
       </h2>
 
       {style === 'divided' && <PostListDivided posts={allPosts} />}

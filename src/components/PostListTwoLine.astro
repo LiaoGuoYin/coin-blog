@@ -1,5 +1,6 @@
 ---
 import { formatDate, estimateReadingTime } from '../lib/posts';
+import { siteConfig } from '../lib/config';
 import type { Post } from '../lib/posts';
 
 interface Props {
@@ -15,7 +16,7 @@ const { posts } = Astro.props;
       <a href={`/${post.slug}`} class="twoline-item">
         <span class="twoline-title">{post.title}</span>
         <span class="twoline-meta">
-          {formatDate(post.date)} · 约 {estimateReadingTime(post.content)} 分钟
+          {formatDate(post.date)} · {siteConfig.ui.readingTime(estimateReadingTime(post.content))}
         </span>
       </a>
     </li>

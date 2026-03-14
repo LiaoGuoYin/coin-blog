@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Sidebar from '../components/Sidebar.astro';
 import MobileHeader from '../components/MobileHeader.astro';
+import { siteConfig } from '../lib/config';
 
 interface Props {
   title?: string;
@@ -9,22 +10,22 @@ interface Props {
 }
 
 const {
-  title = "Coin's Blog",
-  description = "A personal blog by Coin",
+  title = siteConfig.title,
+  description = siteConfig.description,
 } = Astro.props;
 
 const currentPath = Astro.url.pathname;
 ---
 
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang={siteConfig.lang}>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content={description} />
   <title>{title}</title>
-  <link rel="icon" type="image/svg+xml" href="/avatar.svg" />
-  <link rel="alternate" type="application/atom+xml" title="Coin's Blog" href="/atom.xml" />
+  <link rel="icon" type="image/svg+xml" href={siteConfig.avatar} />
+  <link rel="alternate" type="application/atom+xml" title={siteConfig.title} href="/atom.xml" />
 
   <!-- Dark mode init script (runs before page renders to prevent flash) -->
   <script is:inline>
