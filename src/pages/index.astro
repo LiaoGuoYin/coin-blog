@@ -1,46 +1,85 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import PostList from '../components/PostList.astro';
-import { getAllPosts } from '../lib/posts';
+import { getAllPosts, formatDate } from '../lib/posts';
 
 const allPosts = getAllPosts();
-const recentPosts = allPosts.slice(0, 10);
+const INITIAL = 50;
+const initialPosts = allPosts.slice(0, INITIAL);
+const remainingPosts = allPosts.slice(INITIAL).map((p) => ({
+  title: p.title,
+  slug: p.slug,
+  date: formatDate(p.date),
+}));
 ---
 
 <Layout title="Coin's Blog">
-  <div class="p-6 flex flex-col gap-6">
-    <!-- Recent Posts section -->
+  <div class="p-4 sm:p-6 flex flex-col gap-4">
     <section>
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-base font-semibold" style="color: var(--bronze-12);">
-          Recent Posts
-        </h2>
-        {allPosts.length > 10 && (
-          <a
-            href="/post"
-            class="text-sm transition-colors"
-            style="color: var(--grass-11);"
-          >
-            查看全部 →
-          </a>
-        )}
-      </div>
-      {recentPosts.length > 0 ? (
-        <PostList posts={recentPosts} />
-      ) : (
-        <p class="text-sm" style="color: var(--sand-11);">No posts yet.</p>
-      )}
-      {allPosts.length > 10 && (
-        <div class="mt-4 text-right">
-          <a
-            href="/post"
-            class="text-sm transition-colors"
-            style="color: var(--grass-11);"
-          >
-            查看全部 →
-          </a>
-        </div>
-      )}
+      <h2 class="text-base font-semibold mb-4" style="color: var(--bronze-12);">
+        Posts
+      </h2>
+
+      <ul id="post-list" class="flex flex-col gap-0 list-none m-0 p-0">
+        {initialPosts.map((post) => (
+          <li>
+            <a
+              href={`/${post.slug}`}
+              class="post-item flex gap-4 justify-between items-center rounded-md p-2 -mx-2 transition-colors duration-100"
+              style="text-decoration: none;"
+            >
+              <span class="truncate text-sm" style="color: var(--sand-12);">{post.title}</span>
+              <span
+                class="flex-1 border-b border-dashed"
+                style="border-color: var(--sand-6); min-width: 1rem;"
+              ></span>
+              <span class="font-mono flex-shrink-0 text-sm" style="color: var(--sand-11);">
+                {formatDate(post.date)}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <!-- Sentinel: observed to trigger loading more -->
+      <div id="post-sentinel" style="height: 1px; margin-top: 1rem;"></div>
     </section>
   </div>
 </Layout>
+
+<style>
+  .post-item:hover {
+    background-color: var(--sand-3);
+  }
+</style>
+
+<script define:vars={{ remainingPosts }}>
+  const list = document.getElementById('post-list');
+  const sentinel = document.getElementById('post-sentinel');
+  let queue = remainingPosts;
+
+  function createItem(post) {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = `/${post.slug}`;
+    a.className = 'post-item flex gap-4 justify-between items-center rounded-md p-2 -mx-2 transition-colors duration-100';
+    a.style.textDecoration = 'none';
+    a.innerHTML = `
+      <span class="truncate text-sm" style="color:var(--sand-12)">${post.title}</span>
+      <span class="flex-1 border-b border-dashed" style="border-color:var(--sand-6);min-width:1rem"></span>
+      <span class="font-mono flex-shrink-0 text-sm" style="color:var(--sand-11)">${post.date}</span>
+    `;
+    li.appendChild(a);
+    return li;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    if (!entries[0].isIntersecting || queue.length === 0) return;
+    const batch = queue.splice(0, 20);
+    const frag = document.createDocumentFragment();
+    batch.forEach((p) => frag.appendChild(createItem(p)));
+    list.appendChild(frag);
+    if (queue.length === 0) observer.disconnect();
+  }, { rootMargin: '300px' });
+
+  if (queue.length > 0) observer.observe(sentinel);
+</script>

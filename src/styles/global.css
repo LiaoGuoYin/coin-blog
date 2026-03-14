@@ -231,6 +231,7 @@ body {
   padding: 0;
   background-color: var(--gold-2);
   color: var(--sand-12);
+  overflow-x: hidden;
 }
 
 /* Scrollable sidebar */
@@ -256,6 +257,33 @@ body {
 /* shadow-border utility */
 .shadow-border {
   box-shadow: 0 0 0 1px var(--sand-6);
+}
+
+/* ===== Prose overflow containment ===== */
+.prose {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.prose pre {
+  overflow-x: auto;
+  max-width: 100%;
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+.prose table {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
 }
 
 /* ===== Prose font overrides (Claude-style: serif body + mono code) ===== */

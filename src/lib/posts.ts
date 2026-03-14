@@ -62,9 +62,9 @@ export function getMemoBySlug(slug: string): Post | undefined {
 
 export function formatDate(dateStr: string): string {
   if (!dateStr) return '';
-  // Expect YYYY-MM-DD or YYYY/MM/DD
   const normalized = dateStr.replace(/\//g, '-');
-  const [year, month, day] = normalized.split('-');
-  if (!year || !month || !day) return dateStr;
-  return `${year} / ${month} / ${day}`;
+  const [year, month, rawDay] = normalized.split('-');
+  if (!year || !month || !rawDay) return dateStr;
+  const day = rawDay.split(/[T\s]/)[0]; // strip time if present
+  return `${year}-${month}-${day}`;
 }
