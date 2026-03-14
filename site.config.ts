@@ -24,13 +24,6 @@ export const siteConfig = {
     { href: "/atom.xml", label: "RSS", external: true },
   ],
 
-  /** 主题切换按钮标签 */
-  themeLabels: {
-    light: "Light",
-    dark: "Dark",
-    system: "Auto",
-  },
-
   /** UI 文案 */
   ui: {
     tocLabel: "本文导览",

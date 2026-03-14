@@ -18,7 +18,7 @@ function isActive(href: string): boolean {
 ---
 
 <aside class="hidden lg:flex lg:flex-col lg:w-48 xl:w-56 p-3 min-h-screen scrollable-area">
-  <!-- Logo + Title -->
+  <!-- Logo + Title + Theme Toggle -->
   <div class="flex items-center gap-2.5 py-6 px-2">
     <a href="/" class="shrink-0">
       <img
@@ -28,9 +28,10 @@ function isActive(href: string): boolean {
         style="box-shadow: 0 0 0 2px var(--sand-6);"
       />
     </a>
-    <h1 class="text-sm font-semibold" style="color: var(--bronze-12);">
+    <h1 class="text-sm font-semibold flex-1" style="color: var(--bronze-12);">
       {siteConfig.title}
     </h1>
+    <ThemeToggle />
   </div>
 
   <!-- Navigation -->
@@ -60,13 +61,8 @@ function isActive(href: string): boolean {
   </nav>
 
   <!-- Activity Graph -->
-  <div class="mt-auto px-2 pt-4">
+  <div class="mt-auto px-2 pt-4 pb-2">
     <h3 class="text-xs font-medium mb-2" style="color: var(--sand-9);">Activity</h3>
     <ActivityGraph />
-  </div>
-
-  <!-- Theme Toggle at bottom -->
-  <div class="pt-4 pb-2 flex justify-start px-2">
-    <ThemeToggle />
   </div>
 </aside>
