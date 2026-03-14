@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@radix-ui/colors':
-        specifier: ^3.0.0
-        version: 3.0.0
       '@shikijs/markdown-it':
         specifier: ^4.0.2
         version: 4.0.2
@@ -32,9 +29,6 @@ importers:
       markdown-it-github-alerts:
         specifier: ^1.0.1
         version: 1.0.1(markdown-it@14.1.1)
-      marked:
-        specifier: ^17.0.4
-        version: 17.0.4
       shiki:
         specifier: ^4.0.2
         version: 4.0.2
@@ -45,9 +39,6 @@ importers:
       '@types/markdown-it':
         specifier: ^14.1.2
         version: 14.1.2
-      '@types/markdown-it-anchor':
-        specifier: ^7.0.0
-        version: 7.0.0(@types/markdown-it@14.1.2)(markdown-it@14.1.1)
       tailwindcss:
         specifier: ^4.2.1
         version: 4.2.1
@@ -647,9 +638,6 @@ packages:
   '@poppinss/exception@1.2.3':
     resolution: {integrity: sha512-dCED+QRChTVatE9ibtoaxc+WkdzOSjYTKi/+uacHWIsfodVfpsueo3+DKpgU5Px8qXjgmXkSvhXvSCz3fnP9lw==}
 
-  '@radix-ui/colors@3.0.0':
-    resolution: {integrity: sha512-FUOsGBkHrYJwCSEtWRCIfQbZG7q1e6DgxCIOe1SUQzDe/7rXXeA47s8yCn6fuTNQAj1Zq4oTFi9Yjp3wzElcxg==}
-
   '@rollup/pluginutils@5.3.0':
     resolution: {integrity: sha512-5EdhGZtnu3V88ces7s53hhfK5KSASnJZv8Lulpc04cWO3REESroJXg73DFsOmgbU2BhwV0E20bu2IDZb3VKW4Q==}
     engines: {node: '>=14.0.0'}
@@ -954,10 +942,6 @@ packages:
 
   '@types/linkify-it@5.0.0':
     resolution: {integrity: sha512-sVDA58zAw4eWAffKOaQH5/5j3XeayukzDk+ewSsnv3p4yJEZHCCzMDiZM8e0OUrRvmpGZ85jf4yDHkHsgBNr9Q==}
-
-  '@types/markdown-it-anchor@7.0.0':
-    resolution: {integrity: sha512-kFehISVfgSePSp6JWGWrcgKIPoPpAsZAqTLUt0Wq9+MNiGdnWdXQy8UerwhmD2afmjux1TWf8XCmlpL2/6ax/A==}
-    deprecated: This is a stub types definition. markdown-it-anchor provides its own type definitions, so you do not need this installed.
 
   '@types/markdown-it@14.1.2':
     resolution: {integrity: sha512-promo4eFwuiW+TfGxhi+0x3czqTYJkG8qB17ZUJiVF10Xm7NLVRSLUsfRTU/6h1e24VvRnXCx+hG7li58lkzog==}
@@ -1419,11 +1403,6 @@ packages:
 
   markdown-table@3.0.4:
     resolution: {integrity: sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw==}
-
-  marked@17.0.4:
-    resolution: {integrity: sha512-NOmVMM+KAokHMvjWmC5N/ZOvgmSWuqJB8FoYI019j4ogb/PeRMKoKIjReZ2w3376kkA8dSJIP8uD993Kxc0iRQ==}
-    engines: {node: '>= 20'}
-    hasBin: true
 
   mdast-util-definitions@6.0.0:
     resolution: {integrity: sha512-scTllyX6pnYNZH/AIp/0ePz6s4cZtARxImwoPJ7kS42n+MnVsI4XbnG6d4ibehRIldYMWM2LD7ImQblVhUejVQ==}
@@ -2453,8 +2432,6 @@ snapshots:
 
   '@poppinss/exception@1.2.3': {}
 
-  '@radix-ui/colors@3.0.0': {}
-
   '@rollup/pluginutils@5.3.0(rollup@4.59.0)':
     dependencies:
       '@types/estree': 1.0.8
@@ -2671,13 +2648,6 @@ snapshots:
       '@types/unist': 3.0.3
 
   '@types/linkify-it@5.0.0': {}
-
-  '@types/markdown-it-anchor@7.0.0(@types/markdown-it@14.1.2)(markdown-it@14.1.1)':
-    dependencies:
-      markdown-it-anchor: 9.2.0(@types/markdown-it@14.1.2)(markdown-it@14.1.1)
-    transitivePeerDependencies:
-      - '@types/markdown-it'
-      - markdown-it
 
   '@types/markdown-it@14.1.2':
     dependencies:
@@ -3254,8 +3224,6 @@ snapshots:
       uc.micro: 2.1.0
 
   markdown-table@3.0.4: {}
-
-  marked@17.0.4: {}
 
   mdast-util-definitions@6.0.0:
     dependencies:

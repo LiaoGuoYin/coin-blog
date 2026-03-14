@@ -38,11 +38,10 @@ import { siteConfig } from '../lib/config';
 >
   <nav class="flex flex-col gap-1">
     {siteConfig.navLinks.map((link) => {
-      const isTab = link.href === '/' || link.href === '/memo';
-      const tabName = link.href === '/memo' ? 'memos' : link.href === '/' ? 'posts' : undefined;
+      const tabName = link.href === '/post' ? 'posts' : link.href === '/memo' ? 'memos' : undefined;
       return (
         <a
-          href={isTab ? (tabName === 'memos' ? '/#memos' : '/') : link.href}
+          href={link.href}
           data-tab={tabName}
           target={link.external ? '_blank' : undefined}
           rel={link.external ? 'noopener noreferrer' : undefined}

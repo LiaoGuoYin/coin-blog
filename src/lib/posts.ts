@@ -51,11 +51,6 @@ export function getAllPosts(): Post[] {
   return readMarkdownFiles(path.join(CONTENT_DIR, 'posts'), 'post');
 }
 
-export function getPostBySlug(slug: string): Post | undefined {
-  const posts = getAllPosts();
-  return posts.find((p) => p.slug === slug);
-}
-
 /** Estimate reading time in minutes (Chinese ~300 chars/min, English ~200 words/min) */
 export function estimateReadingTime(content: string): number {
   const chineseChars = (content.match(/[\u4e00-\u9fff]/g) || []).length;

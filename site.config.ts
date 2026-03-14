@@ -15,12 +15,12 @@ export const siteConfig = {
   lang: "zh-CN",
 
   /** 头像路径（放在 public 目录下） */
-  avatar: "/avatar.svg",
+  avatar: "/avatar.png",
 
   /** 导航链接 */
   navLinks: [
-    { href: "/", label: "Posts" },
-    { href: "/memo", label: "Memos" },
+    { href: "/post", label: "Post" },
+    { href: "/memo", label: "Memo" },
     { href: "/atom.xml", label: "RSS", external: true },
   ],
 
