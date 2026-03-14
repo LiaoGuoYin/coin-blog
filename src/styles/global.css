@@ -352,6 +352,21 @@ body {
     "JetBrains Mono", ui-monospace, "Cascadia Code", Menlo, monospace;
 }
 
+/* Inline code (not inside pre/shiki) */
+.prose code:not(pre code):not(.shiki code) {
+  background-color: var(--sand-3);
+  padding: 0.15em 0.35em;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  color: var(--bronze-12);
+  border: 1px solid var(--sand-5);
+}
+
+.prose code:not(pre code):not(.shiki code)::before,
+.prose code:not(pre code):not(.shiki code)::after {
+  content: none;
+}
+
 /* ===== Heading anchor hover indicator ===== */
 .prose h2,
 .prose h3 {

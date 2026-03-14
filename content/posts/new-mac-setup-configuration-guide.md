@@ -16,10 +16,9 @@ feature: ''
 
 为了方便连续输入，调整按键重复速度：系统偏好设置 > 键盘
 
-*   按键重复速度：最快
-    
-*   重复前延迟：短（或倒数第二格）
-    
+* 按键重复速度：最快
+
+* 重复前延迟：短（或倒数第二格）
 
 ### 触控板
 
@@ -27,19 +26,17 @@ feature: ''
 
 ![image-20250329124059851](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_1.png)
 
-*   修改点按力度，开启轻按触摸：系统设置 > 触控板 > 光标与点按 > 点按「**中**」
-    
-*   快速单词查询，开启三指轻点：系统设置 > 触控板 > 光标与点按 > 查询数据检测器「**三指轻点**」
-    
-*   实现鼠标右键，开启双指点按：系统设置 > 触控板 > 光标与点按 > 辅助点按「**双指点按**」
-    
-*   避免误触发，关闭轻点：系统设置 > 触控板 > 光标与点按 > 辅助点按关闭「**轻点来点按**」
-    
+* 修改点按力度，开启轻按触摸：系统设置 > 触控板 > 光标与点按 > 点按「**中**」
+
+* 快速单词查询，开启三指轻点：系统设置 > 触控板 > 光标与点按 > 查询数据检测器「**三指轻点**」
+
+* 实现鼠标右键，开启双指点按：系统设置 > 触控板 > 光标与点按 > 辅助点按「**双指点按**」
+
+* 避免误触发，关闭轻点：系统设置 > 触控板 > 光标与点按 > 辅助点按关闭「**轻点来点按**」
 
 ![image-20250329124642156](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_2.png)
 
-*   [三指选中多行文本](https://sspai.com/post/39202)。开启三指拖拽：系统设置 > 辅助功能 > 互动 > 鼠标与触控板 > 触控板选项「三指拖移」
-    
+* [三指选中多行文本](https://sspai.com/post/39202)。开启三指拖拽：系统设置 > 辅助功能 > 互动 > 鼠标与触控板 > 触控板选项「三指拖移」
 
 ### 台前调度设置
 
@@ -49,12 +46,11 @@ feature: ''
 
 ![image-20250329123547842](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_4.png)打开 Finder，在屏幕右上角选择「偏好设置」（command + .）
 
-*   设置新窗口默认打开位置：Home 目录
-    
-*   自定义侧边栏选项
-    
-*   显示路径栏和状态栏
-    
+* 设置新窗口默认打开位置：Home 目录
+
+* 自定义侧边栏选项
+
+* 显示路径栏和状态栏
 
 ### Terminal 设置
 
@@ -88,12 +84,12 @@ export LANG=en_US.UTF-8 # 重复设置默认语言
 
 为了能随时方便地把本机当作服务器，通过 CLI 或者 VNC 形式进行连接，可以配置远程登录配置项实现 Ubuntu 下 openssh-server 的效果。
 
-> *   Mac Mini：[https://www.youtube.com/watch?v=CITHNloGlnU](https://www.youtube.com/watch?v=CITHNloGlnU)
->     
-> *   文件共享：[https://sspai.com/post/61388](https://sspai.com/post/61388)
->     
+> * Mac Mini：[https://www.youtube.com/watch?v=CITHNloGlnU](https://www.youtube.com/watch?v=CITHNloGlnU)
+>
+> * 文件共享：[https://sspai.com/post/61388](https://sspai.com/post/61388)
+>
 
-### 禁用 .DS\_Store
+### 禁用 .DS_Store
 
 用 Mac 压缩过文件的朋友应该都见过 zip 包中的 💩：[.DS\_Store](https://zh.wikipedia.org/wiki/.DS_Store)，[\_\_MACOSX](https://www.betterzip.net/faq/mac-osx.html)
 
@@ -114,27 +110,24 @@ defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool TRUE
 
 配置为软路由，DHCP 接管网络，可参考（TODO）：
 
-*   [https://dosbat.com/2024/10/08/Macmini+surge+asus%20mesh%E7%BB%84%E7%BD%91/index.html](https://dosbat.com/2024/10/08/Macmini+surge+asus%20mesh%E7%BB%84%E7%BD%91/index.html)
-    
-*   [https://oftime.net/2021/07/27/net/](https://oftime.net/2021/07/27/net/)
-    
-*   [https://qust.me/post/MacSurgeRouter/](https://qust.me/post/MacSurgeRouter/)
-    
+* [https://dosbat.com/2024/10/08/Macmini+surge+asus%20mesh%E7%BB%84%E7%BD%91/index.html](https://dosbat.com/2024/10/08/Macmini+surge+asus%20mesh%E7%BB%84%E7%BD%91/index.html)
+
+* [https://oftime.net/2021/07/27/net/](https://oftime.net/2021/07/27/net/)
+
+* [https://qust.me/post/MacSurgeRouter/](https://qust.me/post/MacSurgeRouter/)
 
 ### Homebrew
 
 [Homebrew](https://brew.sh/) 是 Mac 下面的包管理工具（类似于 apt、yum），可以安装、卸载 Mac GUI/CLI 应用程序。
 
-*   安装 Command Line Tools
-    
+* 安装 Command Line Tools
 
 ```bash
 xcode-select --install
 
 ```
 
-*   安装 Homebrew
-    
+* 安装 Homebrew
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -143,20 +136,18 @@ xcode-select --install
 
 ### NVM
 
-## ![Xnip2024-11-21_23-38-56](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_7.png)
+![Xnip2024-11-21_23-38-56](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_7.png)
 
 [NVM](https://github.com/nvm-sh/nvm)（Node Version Manager）是 Node.js 版本管理工具，可以方便地安装卸载不同版本的 Node.js。
 
-*   安装 NVM
-    
+* 安装 NVM
 
 ```bash
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 
 ```
 
-*   安装 Node.js 20，并启用
-    
+* 安装 Node.js 20，并启用
 
 ```bash
 nvm install 20
@@ -169,31 +160,27 @@ npm install -g yarn # 全局安装 Yarn 包管理器
 
 ### Claude Code
 
-*   安装
-    
+* 安装
 
 ```markup
 npm install -g @anthropic-ai/claude-code
 ```
 
-*   备份恢复 ~/.claude 可以查看历史用量，对话历史记录，token 等
-    
+* 备份恢复 ~/.claude 可以查看历史用量，对话历史记录，token 等
 
 ### Codex CLI
 
-*   安装
-    
+* 安装
 
 ```markup
 npm install -g @openai/codex
 ```
 
-*   备份 ~/.codex：
-    
-    *   仅备份 ~/.codex/auth.json 即可无登录切换，[事实上官方也推荐这么做](https://github.com/openai/codex/blob/main/docs/authentication.md)
-        
+* 备份 ~/.codex：
 
-## 应用软件(Homebrew)
+  * 仅备份 ~/.codex/auth.json 即可无登录切换，[事实上官方也推荐这么做](https://github.com/openai/codex/blob/main/docs/authentication.md)
+
+## 应用软件
 
 通过 Homebrew 可以快速安装各种 GUI app：`brew install --cask 软件名标识符`
 
@@ -259,7 +246,9 @@ OrbStack 是一个不错的轻量化替代方案。
 
 注：M 系列 Mac 是 Arm 架构，实际测试下来有很多容器程序可能没有非 x86 镜像
 
-### ![image-20250329121810545](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_8.png)Git
+![image-20250329121810545](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_8.png)
+
+### Git
 
 代码版本管理。安装 Git，配置 commiter 信息。
 
@@ -273,17 +262,15 @@ git config --global user.email "liaoguoyin#live.com"
 
 ![Xnip2024-11-21_23-40-59](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_9.png)
 
-*   安装 code 命令行快速启动。运行 VS Code，打开命令面板（`command + shift + p`）输入 `Shell` 找到「Shell 命令: 在 PATH 中安装 code 命令」
-    
-*   安装插件
-    
+* 安装 code 命令行快速启动。运行 VS Code，打开命令面板（`command + shift + p`）输入 `Shell` 找到「Shell 命令: 在 PATH 中安装 code 命令」
+
+* 安装插件
 
 ### Typora
 
 ![Xnip2024-11-21_23-39-14](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_10.png)
 
-*   Markdown 编辑器。所见即所得。
-    
+* Markdown 编辑器。所见即所得。
 
 ### Raycast
 
@@ -291,86 +278,76 @@ git config --global user.email "liaoguoyin#live.com"
 
 替换 Spotlight 的瑞士军刀，一个软件能平替好几个软件。年度值得订阅的软件。
 
-*   记录剪切板历史并在设备间同步，替换 Paste、PasteNow
-    
-*   文字 OCR，替换微信 OCR
-    
-*   整段翻译，替换欧陆词典、DeepL
-    
-*   窗口管理，替换 Magnet
-    
-*   OpenAI Chat 能力
-    
-*   简单计算器，汇率实时转换
-    
+* 记录剪切板历史并在设备间同步，替换 Paste、PasteNow
+
+* 文字 OCR，替换微信 OCR
+
+* 整段翻译，替换欧陆词典、DeepL
+
+* 窗口管理，替换 Magnet
+
+* OpenAI Chat 能力
+
+* 简单计算器，汇率实时转换
 
 ### HeyNote
 
 ![image-20250329133624445](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_12.png)
 
-*   文本暂存。临时存放一些代码片段、待办事项
-    
+* 文本暂存。临时存放一些代码片段、待办事项
 
 ### Windows App
 
 ![image-20250329141007877](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_13.png)
 
-*   远程桌面连接客户端，支持 RDP VNC 协议，微软为果子倾情打造
-    
+* 远程桌面连接客户端，支持 RDP VNC 协议，微软为果子倾情打造
 
 ### Adobe
 
 ![image-20250329142542463](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_14.png)
 
-*   视频剪辑：After Effect，Premiere Pro
-    
-*   图片处理：PhotoShop，Lightroom
-    
+* 视频剪辑：After Effect，Premiere Pro
+
+* 图片处理：PhotoShop，Lightroom
 
 ### Figma
 
 ![image-20250329140437622](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_15.png)
 
-*   原型设计工具。轻量 P 图
-    
+* 原型设计工具。轻量 P 图
 
-### ~TeamViewer（已切换为 RustDesk + 自建中转节点）~
+### TeamViewer
 
 ![image-20250329143354474](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_16.png)
 
-*   远程协助。帮朋友修修电脑软件文件
-    
-    *   可能会有被判断为商用然后被断开链接的问题，但通过远程组网不走 TeamViewer 服务器来解决
-        
-    *   通过走组网连接，TeamViewer 体验非常好
-        
+* 远程协助。帮朋友修修电脑软件文件
+  * 可能会有被判断为商用然后被断开链接的问题，但通过远程组网不走 TeamViewer 服务器来解决
+  * 通过走组网连接，TeamViewer 体验非常好
+  * 已切换为 RustDesk + 自建中转节点
 
 ### LocalSend
 
 ![image-20250329140258702](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_17.png)
 
-*   跨平台文件传输工具。可以在局域网中多个设备传文件：比如 Ubuntu 传 Mac，Android 传 iPhone
-    
+* 跨平台文件传输工具。可以在局域网中多个设备传文件：比如 Ubuntu 传 Mac，Android 传 iPhone
 
 ### Spotify
 
 ![image-20250329140735278](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_18.png)
 
-*   听歌的。
-    
-    *   跨平台体验好，能用手机控制同账号下的其他设备端播放器
-        
-    *   开放能力好，还能通过 API 进行一些插件的开发（比如获取正在听的歌，切歌等操作）
-        
-    *   曲库还算完整。~比如能听某些404的歌~
-        
+* 听歌的。
+
+  * 跨平台体验好，能用手机控制同账号下的其他设备端播放器
+
+  * 开放能力好，还能通过 API 进行一些插件的开发（比如获取正在听的歌，切歌等操作）
+
+  * 曲库还算完整。~比如能听某些404的歌~
 
 ### 1Password
 
 ![image-20250329141605255](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_19.png)
 
-*   密码管理工具。用了这个软件之后就几乎没记过密码，也不用担心被撞库了。个人觉得最值得花钱的软件，~GitHub Education EDU 还能白嫖~
-    
+* 密码管理工具。用了这个软件之后就几乎没记过密码，也不用担心被撞库了。个人觉得最值得花钱的软件，~GitHub Education EDU 还能白嫖~
 
 ## 数据迁移
 
@@ -386,24 +363,23 @@ git config --global user.email "liaoguoyin#live.com"
 
 ### Chrome 浏览器
 
-*   插件配置
-    
-    *   油猴插件：屏蔽内容农场，自定义一些本地脚本优化网页
-        
-    *   沉浸式翻译：按需无感翻译
-        
-    *   CookieCloud：多端 Cookie 同步
-        
-    *   Wappalyzer：网站技术栈查看
-        
-    *   Memos：快速发送笔记到 self-memos
-        
-*   Chrome 多用户登录
-    
-    *   工作马甲
-        
-    *   生活日常马甲
-        
+* 插件配置
+
+  * 油猴插件：屏蔽内容农场，自定义一些本地脚本优化网页
+
+  * 沉浸式翻译：按需无感翻译
+
+  * CookieCloud：多端 Cookie 同步
+
+  * Wappalyzer：网站技术栈查看
+
+  * Memos：快速发送笔记到 self-memos
+
+* Chrome 多用户登录
+
+  * 工作马甲
+
+  * 生活日常马甲
 
 ### Mail
 
