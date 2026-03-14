@@ -1,7 +1,9 @@
 import MarkdownIt from 'markdown-it';
+import type StateCore from 'markdown-it/lib/rules_core/state_core.mjs';
 import anchor from 'markdown-it-anchor';
 import { fromHighlighter } from '@shikijs/markdown-it';
 import { createHighlighter } from 'shiki';
+import githubAlerts from 'markdown-it-github-alerts';
 
 const LANGS = [
   'javascript', 'typescript', 'jsx', 'tsx',
@@ -48,6 +50,32 @@ async function getMd(): Promise<MarkdownIt> {
     _md.enable(['strikethrough']);
 
     _md.use(anchor, { slugify });
+
+    _md.use(githubAlerts);
+
+    // Convert ![alt](src) images to <figure><img><figcaption> when alt is present
+    _md.use((md: MarkdownIt) => {
+      md.core.ruler.after('inline', 'image_to_figure', (state: StateCore) => {
+        for (let i = 0; i < state.tokens.length; i++) {
+          const token = state.tokens[i];
+          if (token.type !== 'paragraph_open') continue;
+          const inline = state.tokens[i + 1];
+          if (!inline || inline.type !== 'inline' || !inline.children) continue;
+          // Check if paragraph contains only a single image
+          const imgs = inline.children.filter((t) => t.type === 'image');
+          if (imgs.length !== 1 || inline.children.filter((t) => t.type !== 'image' && t.content?.trim()).length > 0) continue;
+          const imgToken = imgs[0];
+          const alt = imgToken.children?.map((t) => t.content).join('') || '';
+          const src = imgToken.attrGet('src') || '';
+          if (!alt) continue;
+          // Replace paragraph_open + inline + paragraph_close with raw HTML
+          const figureHtml = `<figure><img src="${src}" alt="${alt}" loading="lazy"><figcaption>${alt}</figcaption></figure>`;
+          const htmlToken = new state.Token('html_block', '', 0);
+          htmlToken.content = figureHtml + '\n';
+          state.tokens.splice(i, 3, htmlToken);
+        }
+      });
+    });
 
     _md.use(fromHighlighter(highlighter, {
       themes: { light: 'github-light', dark: 'github-dark' },
