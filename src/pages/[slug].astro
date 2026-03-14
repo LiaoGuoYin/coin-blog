@@ -1,27 +1,38 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { getAllPosts, getAllMemos, formatDate } from '../lib/posts';
+import { getAllPosts, getAllMemos, formatDate, estimateReadingTime } from '../lib/posts';
 import { renderMarkdown } from '../lib/markdown';
-import type { Post } from '../lib/posts';
+import type { Post, PostMeta } from '../lib/posts';
 
 export async function getStaticPaths() {
   const posts = getAllPosts();
   const memos = getAllMemos();
   const all: Post[] = [...posts, ...memos];
 
-  return all.map((item) => ({
-    params: { slug: item.slug },
-    props: { post: item },
-  }));
+  return all.map((item) => {
+    // Find prev/next within the same type
+    const siblings = item.type === 'post' ? posts : memos;
+    const idx = siblings.findIndex((s) => s.slug === item.slug);
+    const prev = idx < siblings.length - 1 ? siblings[idx + 1] : null;
+    const next = idx > 0 ? siblings[idx - 1] : null;
+
+    return {
+      params: { slug: item.slug },
+      props: { post: item, prev, next },
+    };
+  });
 }
 
 interface Props {
   post: Post;
+  prev: PostMeta | null;
+  next: PostMeta | null;
 }
 
-const { post } = Astro.props;
+const { post, prev, next } = Astro.props;
 const { html: contentHtml, headings } = await renderMarkdown(post.content);
 const pageTitle = `${post.title} — Coin's Blog`;
+const readingTime = estimateReadingTime(post.content);
 ---
 
 <Layout title={pageTitle}>
@@ -35,7 +46,7 @@ const pageTitle = `${post.title} — Coin's Blog`;
         ← {post.type === 'memo' ? 'Memos' : 'Posts'}
       </a>
       <h1 class="post-title">{post.title}</h1>
-      <p class="post-date">{formatDate(post.date)}</p>
+      <p class="post-date">{formatDate(post.date)} · 约 {readingTime} 分钟</p>
     </header>
 
     <!-- Body: content + TOC -->
@@ -58,7 +69,28 @@ const pageTitle = `${post.title} — Coin's Blog`;
         </nav>
       )}
     </div>
+
+    <!-- Prev / Next navigation -->
+    {(prev || next) && (
+      <nav class="post-nav">
+        {prev ? (
+          <a href={`/${prev.slug}`} class="post-nav-link post-nav-prev">
+            <span class="post-nav-label">← 上一篇</span>
+            <span class="post-nav-title">{prev.title}</span>
+          </a>
+        ) : <div />}
+        {next ? (
+          <a href={`/${next.slug}`} class="post-nav-link post-nav-next">
+            <span class="post-nav-label">下一篇 →</span>
+            <span class="post-nav-title">{next.title}</span>
+          </a>
+        ) : <div />}
+      </nav>
+    )}
   </article>
+
+  <!-- Back to top button -->
+  <button class="back-to-top" id="back-to-top" aria-label="返回顶部">↑</button>
 </Layout>
 
 <style>
@@ -226,6 +258,76 @@ const pageTitle = `${post.title} — Coin's Blog`;
     font-weight: 600;
   }
 
+  /* Prev / Next navigation */
+  .post-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--sand-5);
+    max-width: 68ch;
+  }
+
+  .post-nav-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    text-decoration: none;
+    max-width: 45%;
+  }
+
+  .post-nav-next {
+    margin-left: auto;
+    text-align: right;
+  }
+
+  .post-nav-label {
+    font-size: 0.75rem;
+    color: var(--sand-9);
+    letter-spacing: 0.02em;
+  }
+
+  .post-nav-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--bronze-12);
+    line-height: 1.4;
+  }
+
+  .post-nav-link:hover .post-nav-title {
+    color: var(--grass-11);
+  }
+
+  /* Back to top button */
+  .back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--sand-5);
+    border-radius: 0.375rem;
+    background-color: var(--sand-1);
+    color: var(--sand-11);
+    font-size: 1rem;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 40;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .back-to-top:hover {
+    background-color: var(--sand-3);
+    color: var(--sand-12);
+  }
+
 </style>
 
 <script>
@@ -308,6 +410,22 @@ const pageTitle = `${post.title} — Coin's Blog`;
   (scrollContainer instanceof HTMLElement ? scrollContainer : window)
     .addEventListener('scroll', update, { passive: true });
   update();
+
+  // Back to top button
+  const backToTop = document.getElementById('back-to-top');
+  function updateBackToTop() {
+    const scrollTop = getScrollTop();
+    backToTop?.classList.toggle('visible', scrollTop > 400);
+  }
+  (scrollContainer instanceof HTMLElement ? scrollContainer : window)
+    .addEventListener('scroll', updateBackToTop, { passive: true });
+  backToTop?.addEventListener('click', () => {
+    if (scrollContainer instanceof HTMLElement) {
+      scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
 
   // Code block copy buttons
   document.querySelectorAll('.prose .shiki').forEach((block) => {

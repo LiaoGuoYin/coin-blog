@@ -60,6 +60,16 @@ export function getMemoBySlug(slug: string): Post | undefined {
   return memos.find((p) => p.slug === slug);
 }
 
+/** Estimate reading time in minutes (Chinese ~300 chars/min, English ~200 words/min) */
+export function estimateReadingTime(content: string): number {
+  // Count Chinese characters
+  const chineseChars = (content.match(/[\u4e00-\u9fff]/g) || []).length;
+  // Count English words (remaining non-Chinese text)
+  const englishWords = content.replace(/[\u4e00-\u9fff]/g, '').split(/\s+/).filter(Boolean).length;
+  const minutes = chineseChars / 300 + englishWords / 200;
+  return Math.max(1, Math.round(minutes));
+}
+
 export function formatDate(dateStr: string): string {
   if (!dateStr) return '';
   const normalized = dateStr.replace(/\//g, '-');
