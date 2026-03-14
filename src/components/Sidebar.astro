@@ -12,9 +12,6 @@ function isActive(href: string): boolean {
   if (href === '/') {
     return currentPath === '/' || currentPath.startsWith('/post');
   }
-  if (href === '/memo') {
-    return currentPath === '/memo' || currentPath.startsWith('/memo/');
-  }
   return false;
 }
 ---
@@ -38,10 +35,15 @@ function isActive(href: string): boolean {
   <!-- Navigation -->
   <nav class="flex flex-col gap-1 flex-1">
     {siteConfig.navLinks.map((link) => {
+      // Posts and Memos are tabs on the homepage
+      const isTab = link.href === '/' || link.href === '/memo';
+      const tabName = link.href === '/memo' ? 'memos' : link.href === '/' ? 'posts' : undefined;
       const active = isActive(link.href);
+
       return (
         <a
-          href={link.href}
+          href={isTab ? (tabName === 'memos' ? '/#memos' : '/') : link.href}
+          data-tab={tabName}
           target={link.external ? '_blank' : undefined}
           rel={link.external ? 'noopener noreferrer' : undefined}
           class={[

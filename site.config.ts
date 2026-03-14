@@ -54,4 +54,7 @@ export const siteConfig = {
    * - 'preview'   : 带摘要预览 — 标题 + 日期 + 正文前80字摘要
    */
   postListStyle: "twoLine" as "divided" | "twoLine" | "preview",
+
+  /** Memos API 地址 */
+  memosApiUrl: "https://memo.nas.hz.moyumomokan.cn",
 };

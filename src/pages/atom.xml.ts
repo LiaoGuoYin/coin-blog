@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getAllPosts, getAllMemos } from '../lib/posts';
+import { getAllPosts } from '../lib/posts';
 import { siteConfig } from '../lib/config';
 
 function escapeXml(str: string): string {
@@ -13,14 +13,10 @@ function escapeXml(str: string): string {
 
 export const GET: APIRoute = () => {
   const posts = getAllPosts();
-  const memos = getAllMemos();
 
-  // Combine and sort by date
-  const all = [...posts, ...memos].sort((a, b) => b.date.localeCompare(a.date));
+  const updated = posts.length > 0 ? new Date(posts[0].date).toISOString() : new Date().toISOString();
 
-  const updated = all.length > 0 ? new Date(all[0].date).toISOString() : new Date().toISOString();
-
-  const entries = all.map((post) => {
+  const entries = posts.map((post) => {
     const url = `${siteConfig.url}/${post.slug}`;
     const dateIso = post.date ? new Date(post.date).toISOString() : new Date().toISOString();
 

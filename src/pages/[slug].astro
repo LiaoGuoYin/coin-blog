@@ -1,21 +1,17 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { getAllPosts, getAllMemos, formatDate, estimateReadingTime } from '../lib/posts';
+import { getAllPosts, formatDate, estimateReadingTime } from '../lib/posts';
 import { renderMarkdown } from '../lib/markdown';
 import { siteConfig } from '../lib/config';
 import type { Post, PostMeta } from '../lib/posts';
 
 export async function getStaticPaths() {
   const posts = getAllPosts();
-  const memos = getAllMemos();
-  const all: Post[] = [...posts, ...memos];
 
-  return all.map((item) => {
-    // Find prev/next within the same type
-    const siblings = item.type === 'post' ? posts : memos;
-    const idx = siblings.findIndex((s) => s.slug === item.slug);
-    const prev = idx < siblings.length - 1 ? siblings[idx + 1] : null;
-    const next = idx > 0 ? siblings[idx - 1] : null;
+  return posts.map((item) => {
+    const idx = posts.findIndex((s) => s.slug === item.slug);
+    const prev = idx < posts.length - 1 ? posts[idx + 1] : null;
+    const next = idx > 0 ? posts[idx - 1] : null;
 
     return {
       params: { slug: item.slug },
@@ -40,11 +36,8 @@ const readingTime = estimateReadingTime(post.content);
   <article class="post-article" data-copy-label={siteConfig.ui.copyButton} data-copied-label={siteConfig.ui.copiedButton}>
     <!-- Post header -->
     <header class="post-header">
-      <a
-        href={post.type === 'memo' ? '/memo' : '/post'}
-        class="post-back"
-      >
-        ← {post.type === 'memo' ? siteConfig.ui.memosHeading : siteConfig.ui.postsHeading}
+      <a href="/post" class="post-back">
+        ← {siteConfig.ui.postsHeading}
       </a>
       <h1 class="post-title">{post.title}</h1>
       <p class="post-date">{formatDate(post.date)} · {siteConfig.ui.readingTime(readingTime)}</p>
