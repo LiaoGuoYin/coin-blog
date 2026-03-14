@@ -1,0 +1,80 @@
+---
+// Mobile header: logo + menu button that toggles the nav drawer
+---
+
+<div class="flex items-center px-4 pt-3 pb-2 justify-between lg:hidden">
+  <!-- Logo -->
+  <a href="/" class="flex items-center gap-2">
+    <img
+      src="/avatar.svg"
+      alt="Coin's Blog"
+      class="w-8 h-8 rounded-full object-cover"
+      style="box-shadow: 0 0 0 1px var(--sand-6);"
+    />
+    <span class="font-semibold text-sm" style="color: var(--bronze-12);">Coin's Blog</span>
+  </a>
+
+  <!-- Menu button -->
+  <button
+    id="mobile-menu-btn"
+    class="rounded-lg p-2 transition-colors"
+    style="color: var(--sand-11);"
+    aria-label="Toggle navigation"
+    aria-expanded="false"
+  >
+    <svg id="menu-icon-open" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+    <svg id="menu-icon-close" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="hidden">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  </button>
+</div>
+
+<!-- Mobile nav drawer -->
+<div
+  id="mobile-nav"
+  class="hidden lg:hidden px-4 pb-3"
+>
+  <nav class="flex flex-col gap-1">
+    <a
+      href="/"
+      class="rounded-lg py-2 px-4 text-sm font-medium transition-colors hover:bg-sand-3"
+      style="color: var(--sand-11);"
+    >Post</a>
+    <a
+      href="/memo"
+      class="rounded-lg py-2 px-4 text-sm font-medium transition-colors hover:bg-sand-3"
+      style="color: var(--sand-11);"
+    >Memo</a>
+    <a
+      href="/atom.xml"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="rounded-lg py-2 px-4 text-sm font-medium transition-colors hover:bg-sand-3"
+      style="color: var(--sand-11);"
+    >RSS</a>
+  </nav>
+</div>
+
+<script>
+  const btn = document.getElementById('mobile-menu-btn');
+  const nav = document.getElementById('mobile-nav');
+  const iconOpen = document.getElementById('menu-icon-open');
+  const iconClose = document.getElementById('menu-icon-close');
+
+  btn?.addEventListener('click', () => {
+    const isHidden = nav?.classList.contains('hidden');
+    if (isHidden) {
+      nav?.classList.remove('hidden');
+      iconOpen?.classList.add('hidden');
+      iconClose?.classList.remove('hidden');
+      btn.setAttribute('aria-expanded', 'true');
+    } else {
+      nav?.classList.add('hidden');
+      iconOpen?.classList.remove('hidden');
+      iconClose?.classList.add('hidden');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+</script>

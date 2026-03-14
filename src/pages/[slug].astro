@@ -1,0 +1,128 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getAllPosts, getAllMemos, formatDate } from '../lib/posts';
+import type { Post } from '../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = getAllPosts();
+  const memos = getAllMemos();
+  const all: Post[] = [...posts, ...memos];
+
+  return all.map((item) => ({
+    params: { slug: item.slug },
+    props: { post: item },
+  }));
+}
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+
+// Parse markdown content to HTML using a simple approach
+// We'll use the marked-like pattern inline since we don't have a full parser
+// For now render raw markdown in a <pre> style – we'll use a minimal renderer
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function markdownToHtml(md: string): string {
+  let html = md;
+
+  // Fenced code blocks
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
+    return `<pre><code class="language-${lang}">${escapeHtml(code.trimEnd())}</code></pre>`;
+  });
+
+  // Inline code
+  html = html.replace(/`([^`]+)`/g, (_, code) => {
+    return `<code>${escapeHtml(code)}</code>`;
+  });
+
+  // Headers
+  html = html.replace(/^######\s+(.+)$/gm, '<h6>$1</h6>');
+  html = html.replace(/^#####\s+(.+)$/gm, '<h5>$1</h5>');
+  html = html.replace(/^####\s+(.+)$/gm, '<h4>$1</h4>');
+  html = html.replace(/^###\s+(.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^##\s+(.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^#\s+(.+)$/gm, '<h1>$1</h1>');
+
+  // Horizontal rule
+  html = html.replace(/^---+$/gm, '<hr>');
+
+  // Blockquote
+  html = html.replace(/^>\s+(.+)$/gm, '<blockquote>$1</blockquote>');
+
+  // Bold and italic
+  html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+  // Links
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+
+  // Images
+  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
+
+  // Unordered lists
+  html = html.replace(/^[-*]\s+(.+)$/gm, '<li>$1</li>');
+  html = html.replace(/(<li>.*<\/li>\n?)+/g, (match) => `<ul>${match}</ul>`);
+
+  // Ordered lists
+  html = html.replace(/^\d+\.\s+(.+)$/gm, '<li>$1</li>');
+
+  // Paragraphs: wrap lines that aren't already HTML tags
+  html = html.replace(/^(?!<[a-z]|$)(.+)$/gm, '<p>$1</p>');
+
+  // Clean up extra newlines
+  html = html.replace(/\n{3,}/g, '\n\n');
+
+  return html;
+}
+
+const contentHtml = markdownToHtml(post.content);
+const pageTitle = `${post.title} — Coin's Blog`;
+---
+
+<Layout title={pageTitle}>
+  <article class="p-6 flex flex-col gap-4 max-w-3xl">
+    <!-- Post header -->
+    <header class="flex flex-col gap-2 pb-4" style="border-bottom: 1px solid var(--sand-6);">
+      <div class="flex items-center gap-2">
+        <a
+          href={post.type === 'memo' ? '/memo' : '/post'}
+          class="text-xs font-medium transition-colors"
+          style="color: var(--grass-11);"
+        >
+          ← {post.type === 'memo' ? 'Memos' : 'Posts'}
+        </a>
+        <span class="text-xs" style="color: var(--sand-7);">·</span>
+        <span class="font-mono text-xs" style="color: var(--sand-11);">
+          {formatDate(post.date)}
+        </span>
+      </div>
+      <h1 class="text-xl font-semibold leading-snug" style="color: var(--bronze-12);">
+        {post.title}
+      </h1>
+    </header>
+
+    <!-- Post content -->
+    <div class="prose" set:html={contentHtml} />
+  </article>
+</Layout>
+
+<style>
+  .prose :global(a) {
+    color: var(--blue-11);
+    text-decoration: underline;
+  }
+  .prose :global(a:hover) {
+    color: var(--blue-10);
+  }
+</style>

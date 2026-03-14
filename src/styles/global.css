@@ -1,0 +1,354 @@
+@import "tailwindcss";
+
+/* ===== Radix UI Color Tokens ===== */
+
+/* Sand - Light */
+:root, .light, .light-theme {
+  --sand-1: #fdfdfc;
+  --sand-2: #f9f9f8;
+  --sand-3: #f1f0ef;
+  --sand-4: #e9e8e6;
+  --sand-5: #e2e1de;
+  --sand-6: #dad9d6;
+  --sand-7: #cfceca;
+  --sand-8: #bcbbb5;
+  --sand-9: #8d8d86;
+  --sand-10: #82827c;
+  --sand-11: #63635e;
+  --sand-12: #21201c;
+
+  /* Gold */
+  --gold-1: #fdfdfc;
+  --gold-2: #faf9f2;
+  --gold-3: #f2f0e7;
+  --gold-4: #eae6db;
+  --gold-5: #e1dccf;
+  --gold-6: #d8d0bf;
+  --gold-7: #cbc0aa;
+  --gold-8: #b9a88d;
+  --gold-9: #978365;
+  --gold-10: #8c7a5e;
+  --gold-11: #71624b;
+  --gold-12: #3b352b;
+
+  /* Blue */
+  --blue-1: #fbfdff;
+  --blue-2: #f4faff;
+  --blue-3: #e6f4fe;
+  --blue-4: #d5efff;
+  --blue-5: #c2e5ff;
+  --blue-6: #acd8fc;
+  --blue-7: #8ec8f6;
+  --blue-8: #5eb1ef;
+  --blue-9: #0090ff;
+  --blue-10: #0588f0;
+  --blue-11: #0d74ce;
+  --blue-12: #113264;
+
+  /* Bronze */
+  --bronze-1: #fdfcfc;
+  --bronze-2: #fdf7f5;
+  --bronze-3: #f6edea;
+  --bronze-4: #efe4df;
+  --bronze-5: #e7d9d3;
+  --bronze-6: #dfcdc5;
+  --bronze-7: #d3bcb3;
+  --bronze-8: #c2a499;
+  --bronze-9: #a18072;
+  --bronze-10: #957468;
+  --bronze-11: #7d5e54;
+  --bronze-12: #43302b;
+
+  /* Grass */
+  --grass-1: #fbfefb;
+  --grass-2: #f5fbf5;
+  --grass-3: #e9f6e9;
+  --grass-4: #daf1db;
+  --grass-5: #c9e8ca;
+  --grass-6: #b2ddb5;
+  --grass-7: #94ce9a;
+  --grass-8: #65ba74;
+  --grass-9: #46a758;
+  --grass-10: #3e9b4f;
+  --grass-11: #2a7e3b;
+  --grass-12: #203c25;
+}
+
+/* Sand - Dark */
+.dark, .dark-theme {
+  --sand-1: #111110;
+  --sand-2: #191918;
+  --sand-3: #222221;
+  --sand-4: #2a2a28;
+  --sand-5: #31312e;
+  --sand-6: #3b3a37;
+  --sand-7: #494844;
+  --sand-8: #62605b;
+  --sand-9: #6f6d66;
+  --sand-10: #7c7b74;
+  --sand-11: #b5b3ad;
+  --sand-12: #eeeeec;
+
+  /* Gold dark */
+  --gold-1: #121211;
+  --gold-2: #1b1a17;
+  --gold-3: #24231f;
+  --gold-4: #2d2b26;
+  --gold-5: #38352e;
+  --gold-6: #444039;
+  --gold-7: #544f46;
+  --gold-8: #696256;
+  --gold-9: #978365;
+  --gold-10: #a39073;
+  --gold-11: #cbb99f;
+  --gold-12: #e8e2d9;
+
+  /* Blue dark */
+  --blue-1: #0d1520;
+  --blue-2: #111927;
+  --blue-3: #0d2847;
+  --blue-4: #003362;
+  --blue-5: #004074;
+  --blue-6: #104d87;
+  --blue-7: #205d9e;
+  --blue-8: #2870bd;
+  --blue-9: #0090ff;
+  --blue-10: #3b9eff;
+  --blue-11: #70b8ff;
+  --blue-12: #c2e6ff;
+
+  /* Bronze dark */
+  --bronze-1: #141110;
+  --bronze-2: #1c1917;
+  --bronze-3: #262220;
+  --bronze-4: #302a27;
+  --bronze-5: #3b3330;
+  --bronze-6: #493e3a;
+  --bronze-7: #5a4c47;
+  --bronze-8: #6f5f58;
+  --bronze-9: #a18072;
+  --bronze-10: #ae8c7e;
+  --bronze-11: #d4b3a5;
+  --bronze-12: #ede0d9;
+
+  /* Grass dark */
+  --grass-1: #0e1511;
+  --grass-2: #141a15;
+  --grass-3: #1b2a1e;
+  --grass-4: #1d3a24;
+  --grass-5: #25482d;
+  --grass-6: #2d5736;
+  --grass-7: #366740;
+  --grass-8: #3e7949;
+  --grass-9: #46a758;
+  --grass-10: #53b365;
+  --grass-11: #71d083;
+  --grass-12: #c2f0c2;
+}
+
+/* ===== Tailwind v4 custom utilities via @theme ===== */
+@theme inline {
+  --color-sand-1: var(--sand-1);
+  --color-sand-2: var(--sand-2);
+  --color-sand-3: var(--sand-3);
+  --color-sand-4: var(--sand-4);
+  --color-sand-5: var(--sand-5);
+  --color-sand-6: var(--sand-6);
+  --color-sand-7: var(--sand-7);
+  --color-sand-8: var(--sand-8);
+  --color-sand-9: var(--sand-9);
+  --color-sand-10: var(--sand-10);
+  --color-sand-11: var(--sand-11);
+  --color-sand-12: var(--sand-12);
+
+  --color-gold-1: var(--gold-1);
+  --color-gold-2: var(--gold-2);
+  --color-gold-3: var(--gold-3);
+  --color-gold-4: var(--gold-4);
+  --color-gold-5: var(--gold-5);
+  --color-gold-6: var(--gold-6);
+  --color-gold-7: var(--gold-7);
+  --color-gold-8: var(--gold-8);
+  --color-gold-9: var(--gold-9);
+  --color-gold-10: var(--gold-10);
+  --color-gold-11: var(--gold-11);
+  --color-gold-12: var(--gold-12);
+
+  --color-blue-1: var(--blue-1);
+  --color-blue-2: var(--blue-2);
+  --color-blue-3: var(--blue-3);
+  --color-blue-4: var(--blue-4);
+  --color-blue-5: var(--blue-5);
+  --color-blue-6: var(--blue-6);
+  --color-blue-7: var(--blue-7);
+  --color-blue-8: var(--blue-8);
+  --color-blue-9: var(--blue-9);
+  --color-blue-10: var(--blue-10);
+  --color-blue-11: var(--blue-11);
+  --color-blue-12: var(--blue-12);
+
+  --color-bronze-1: var(--bronze-1);
+  --color-bronze-2: var(--bronze-2);
+  --color-bronze-3: var(--bronze-3);
+  --color-bronze-4: var(--bronze-4);
+  --color-bronze-5: var(--bronze-5);
+  --color-bronze-6: var(--bronze-6);
+  --color-bronze-7: var(--bronze-7);
+  --color-bronze-8: var(--bronze-8);
+  --color-bronze-9: var(--bronze-9);
+  --color-bronze-10: var(--bronze-10);
+  --color-bronze-11: var(--bronze-11);
+  --color-bronze-12: var(--bronze-12);
+
+  --color-grass-1: var(--grass-1);
+  --color-grass-2: var(--grass-2);
+  --color-grass-3: var(--grass-3);
+  --color-grass-4: var(--grass-4);
+  --color-grass-5: var(--grass-5);
+  --color-grass-6: var(--grass-6);
+  --color-grass-7: var(--grass-7);
+  --color-grass-8: var(--grass-8);
+  --color-grass-9: var(--grass-9);
+  --color-grass-10: var(--grass-10);
+  --color-grass-11: var(--grass-11);
+  --color-grass-12: var(--grass-12);
+
+  --shadow-border: 0 0 0 1px var(--sand-6);
+}
+
+/* ===== Global Styles ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--gold-2);
+  color: var(--sand-12);
+}
+
+/* Scrollable sidebar */
+.scrollable-area {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sand-6) transparent;
+}
+
+.scrollable-area::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollable-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollable-area::-webkit-scrollbar-thumb {
+  background-color: var(--sand-6);
+  border-radius: 2px;
+}
+
+/* shadow-border utility */
+.shadow-border {
+  box-shadow: 0 0 0 1px var(--sand-6);
+}
+
+/* Prose styles for post content */
+.prose {
+  color: var(--sand-12);
+  line-height: 1.75;
+  max-width: 65ch;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  color: var(--bronze-12);
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose h1 { font-size: 1.875rem; }
+.prose h2 { font-size: 1.5rem; }
+.prose h3 { font-size: 1.25rem; }
+
+.prose p {
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+.prose a {
+  color: var(--blue-11);
+  text-decoration: underline;
+}
+
+.prose a:hover {
+  color: var(--blue-10);
+}
+
+.prose code {
+  background-color: var(--sand-3);
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.875em;
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+}
+
+.prose pre {
+  background-color: var(--sand-3);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1.25em 0;
+}
+
+.prose pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.875em;
+}
+
+.prose blockquote {
+  border-left: 3px solid var(--sand-6);
+  margin-left: 0;
+  padding-left: 1em;
+  color: var(--sand-11);
+  font-style: italic;
+}
+
+.prose ul, .prose ol {
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.prose li {
+  margin-bottom: 0.25em;
+}
+
+.prose hr {
+  border: none;
+  border-top: 1px solid var(--sand-6);
+  margin: 2em 0;
+}
+
+.prose img {
+  border-radius: 0.5rem;
+  max-width: 100%;
+}
+
+/* Dark mode prose */
+.dark .prose code {
+  background-color: var(--sand-4);
+}
+
+.dark .prose pre {
+  background-color: var(--sand-3);
+}
+
+/* Theme toggle transition */
+.theme-indicator {
+  transition: transform 0.15s ease;
+}

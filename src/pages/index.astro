@@ -1,0 +1,46 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PostList from '../components/PostList.astro';
+import { getAllPosts } from '../lib/posts';
+
+const allPosts = getAllPosts();
+const recentPosts = allPosts.slice(0, 10);
+---
+
+<Layout title="Coin's Blog">
+  <div class="p-6 flex flex-col gap-6">
+    <!-- Recent Posts section -->
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-base font-semibold" style="color: var(--bronze-12);">
+          Recent Posts
+        </h2>
+        {allPosts.length > 10 && (
+          <a
+            href="/post"
+            class="text-sm transition-colors"
+            style="color: var(--grass-11);"
+          >
+            查看全部 →
+          </a>
+        )}
+      </div>
+      {recentPosts.length > 0 ? (
+        <PostList posts={recentPosts} />
+      ) : (
+        <p class="text-sm" style="color: var(--sand-11);">No posts yet.</p>
+      )}
+      {allPosts.length > 10 && (
+        <div class="mt-4 text-right">
+          <a
+            href="/post"
+            class="text-sm transition-colors"
+            style="color: var(--grass-11);"
+          >
+            查看全部 →
+          </a>
+        </div>
+      )}
+    </section>
+  </div>
+</Layout>

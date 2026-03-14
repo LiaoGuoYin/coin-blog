@@ -1,0 +1,120 @@
+---
+// ThemeToggle - 3-tab pill switcher (Light / Dark / Auto)
+---
+
+<div class="theme-toggle-wrap">
+  <div
+    id="theme-toggle"
+    class="relative flex items-center rounded-full p-0.5 text-xs font-medium select-none"
+    style="background-color: var(--sand-4);"
+    role="group"
+    aria-label="Theme"
+  >
+    <!-- Sliding white indicator -->
+    <div
+      id="theme-indicator"
+      class="absolute rounded-full transition-transform duration-150 ease-in-out"
+      style="
+        height: calc(100% - 4px);
+        width: calc(33.333% - 2px);
+        background: white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        top: 2px;
+        left: 2px;
+        transform: translateX(0);
+      "
+    ></div>
+
+    <button
+      data-theme="light"
+      class="theme-btn relative z-10 px-3 py-1 rounded-full cursor-pointer border-0 bg-transparent"
+      style="color: var(--sand-11);"
+    >
+      Light
+    </button>
+    <button
+      data-theme="dark"
+      class="theme-btn relative z-10 px-3 py-1 rounded-full cursor-pointer border-0 bg-transparent"
+      style="color: var(--sand-11);"
+    >
+      Dark
+    </button>
+    <button
+      data-theme="system"
+      class="theme-btn relative z-10 px-3 py-1 rounded-full cursor-pointer border-0 bg-transparent"
+      style="color: var(--sand-11);"
+    >
+      Auto
+    </button>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const toggle = document.getElementById('theme-toggle');
+    const indicator = document.getElementById('theme-indicator');
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.theme-btn');
+
+    const themeMap: Record<string, number> = { light: 0, dark: 1, system: 2 };
+
+    function getStoredTheme(): string {
+      try {
+        return localStorage.getItem('theme') || 'system';
+      } catch {
+        return 'system';
+      }
+    }
+
+    function applyTheme(theme: string) {
+      const html = document.documentElement;
+      html.classList.remove('light', 'dark');
+
+      if (theme === 'system') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        html.classList.add(prefersDark ? 'dark' : 'light');
+      } else {
+        html.classList.add(theme);
+      }
+
+      try {
+        localStorage.setItem('theme', theme);
+      } catch {}
+    }
+
+    function updateIndicator(theme: string) {
+      const index = themeMap[theme] ?? 2;
+      const pct = index * 33.333;
+      if (indicator) {
+        (indicator as HTMLElement).style.transform = `translateX(${pct}%)`;
+      }
+
+      // Update button text colors
+      buttons.forEach((btn) => {
+        const isActive = btn.dataset.theme === theme;
+        btn.style.color = isActive ? 'var(--sand-12)' : 'var(--sand-11)';
+        btn.style.fontWeight = isActive ? '600' : '400';
+      });
+    }
+
+    // Initialize
+    const currentTheme = getStoredTheme();
+    updateIndicator(currentTheme);
+
+    // Button click handlers
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme || 'system';
+        applyTheme(theme);
+        updateIndicator(theme);
+      });
+    });
+
+    // Watch for system preference changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      const stored = getStoredTheme();
+      if (stored === 'system') {
+        applyTheme('system');
+      }
+    });
+  })();
+</script>

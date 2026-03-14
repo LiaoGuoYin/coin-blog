@@ -1,0 +1,22 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PostList from '../../components/PostList.astro';
+import { getAllMemos } from '../../lib/posts';
+
+const memos = getAllMemos();
+---
+
+<Layout title="Memos — Coin's Blog">
+  <div class="p-6 flex flex-col gap-6">
+    <section>
+      <h2 class="text-base font-semibold mb-4" style="color: var(--bronze-12);">
+        Memos
+      </h2>
+      {memos.length > 0 ? (
+        <PostList posts={memos} />
+      ) : (
+        <p class="text-sm" style="color: var(--sand-11);">No memos yet.</p>
+      )}
+    </section>
+  </div>
+</Layout>
