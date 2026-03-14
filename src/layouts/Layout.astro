@@ -9,12 +9,20 @@ interface Props {
   description?: string;
 }
 
+interface Props {
+  title?: string;
+  description?: string;
+  ogType?: string;
+}
+
 const {
   title = siteConfig.title,
   description = siteConfig.description,
+  ogType = 'website',
 } = Astro.props;
 
 const currentPath = Astro.url.pathname;
+const canonicalUrl = new URL(currentPath, siteConfig.url).href;
 ---
 
 <!DOCTYPE html>
@@ -24,21 +32,39 @@ const currentPath = Astro.url.pathname;
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content={description} />
   <title>{title}</title>
+  <link rel="canonical" href={canonicalUrl} />
   <link rel="icon" type="image/svg+xml" href={siteConfig.avatar} />
   <link rel="alternate" type="application/atom+xml" title={siteConfig.title} href="/atom.xml" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content={ogType} />
+  <meta property="og:url" content={canonicalUrl} />
+  <meta property="og:image" content={`${siteConfig.url}${siteConfig.avatar}`} />
+  <meta property="og:site_name" content={siteConfig.title} />
+  <meta name="twitter:card" content="summary" />
 
   <!-- Dark mode init script (runs before page renders to prevent flash) -->
   <script is:inline>
     !function(){try{var d=document.documentElement,c=d.classList;c.remove('light','dark');var e=localStorage.getItem('theme');if('system'===e||(!e&&true)){var t='(prefers-color-scheme: dark)',m=window.matchMedia(t);if(m.media!==t||m.matches){c.add('dark')}else{c.add('light')}}else if(e){c.add(e||'')}}catch(e){}}()
   </script>
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts (non-blocking) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Poppins:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
-    rel="stylesheet"
+    rel="preload"
+    as="style"
+    href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Poppins:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    onload="this.onload=null;this.rel='stylesheet'"
   />
+  <noscript>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Poppins:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </noscript>
 </head>
 <body>
   <div

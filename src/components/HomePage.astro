@@ -244,46 +244,17 @@ const style = siteConfig.postListStyle;
 
 <script>
   import MarkdownIt from 'markdown-it';
-  import { fromHighlighter } from '@shikijs/markdown-it';
-  import { createHighlighter } from 'shiki';
   import githubAlerts from 'markdown-it-github-alerts';
 
-  // --- Markdown 渲染器（与主站同款 shiki 双主题） ---
+  // --- Markdown 渲染器（轻量版，不含语法高亮） ---
   let md: MarkdownIt | null = null;
 
-  const LANGS = [
-    'javascript', 'typescript', 'jsx', 'tsx',
-    'css', 'html', 'json', 'markdown', 'yaml', 'toml',
-    'python', 'bash', 'sh', 'shell', 'zsh',
-    'go', 'rust', 'java', 'c', 'cpp', 'swift', 'kotlin',
-    'sql', 'xml', 'dockerfile', 'nginx', 'ini',
-  ];
-
-  async function getMd(): Promise<MarkdownIt> {
+  function getMd(): MarkdownIt {
     if (md) return md;
-
-    const highlighter = await createHighlighter({
-      themes: ['github-light', 'github-dark'],
-      langs: LANGS,
-    });
-
-    const loaded = new Set(highlighter.getLoadedLanguages());
 
     md = new MarkdownIt({ html: true, linkify: true, breaks: true });
     md.enable(['strikethrough']);
     md.use(githubAlerts);
-    md.use(fromHighlighter(highlighter, {
-      themes: { light: 'github-light', dark: 'github-dark' },
-    }));
-
-    // Unknown languages fallback to plain text
-    const originalFence = md.renderer.rules.fence!;
-    md.renderer.rules.fence = (tokens, idx, options, env, self) => {
-      const token = tokens[idx];
-      const lang = token.info.trim().split(/\s+/)[0];
-      if (lang && !loaded.has(lang)) token.info = '';
-      return originalFence(tokens, idx, options, env, self);
-    };
 
     return md;
   }

@@ -481,6 +481,14 @@ body {
   color: #dc2626;
 }
 
+.dark .markdown-alert-caution {
+  background-color: #2c1518;
+  border-color: #e5484d;
+}
+.dark .markdown-alert-caution .markdown-alert-title {
+  color: #ff6369;
+}
+
 /* ===== Code block copy button ===== */
 .prose .shiki-wrapper {
   position: relative;
