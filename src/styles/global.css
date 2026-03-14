@@ -4,7 +4,9 @@
 /* ===== Radix UI Color Tokens ===== */
 
 /* Sand - Light */
-:root, .light, .light-theme {
+:root,
+.light,
+.light-theme {
   --sand-1: #fdfdfc;
   --sand-2: #f9f9f8;
   --sand-3: #f1f0ef;
@@ -76,7 +78,8 @@
 }
 
 /* Sand - Dark */
-.dark, .dark-theme {
+.dark,
+.dark-theme {
   --sand-1: #111110;
   --sand-2: #191918;
   --sand-3: #222221;
@@ -218,12 +221,18 @@
 }
 
 /* ===== Global Styles ===== */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 html {
-  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+  font-family:
+    "Poppins",
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 body {
@@ -232,6 +241,12 @@ body {
   background-color: var(--gold-2);
   color: var(--sand-12);
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: rgba(204, 120, 92, 0.25);
 }
 
 /* Scrollable sidebar */
@@ -288,14 +303,24 @@ body {
 
 /* ===== Prose font overrides (Claude-style: serif body + mono code) ===== */
 .prose {
-  font-family: 'Lora', Georgia, 'Times New Roman', serif;
+  font-family: "Lora", Georgia, "Times New Roman", serif;
   font-size: 1.0625rem;
+  max-width: 68ch;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.85;
+  font-weight: 500;
+}
+
+.prose p {
+  margin-bottom: 1.5em;
 }
 
 .prose code,
 .prose pre,
 .prose .shiki {
-  font-family: 'JetBrains Mono', ui-monospace, 'Cascadia Code', Menlo, monospace;
+  font-family:
+    "JetBrains Mono", ui-monospace, "Cascadia Code", Menlo, monospace;
 }
 
 /* ===== Shiki inside prose ===== */
