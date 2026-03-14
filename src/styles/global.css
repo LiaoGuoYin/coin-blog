@@ -306,14 +306,23 @@ body {
   font-family: "Lora", Georgia, "Times New Roman", serif;
   font-size: 1.0625rem;
   max-width: 68ch;
-  margin-left: auto;
-  margin-right: auto;
   line-height: 1.85;
   font-weight: 500;
 }
 
 .prose p {
-  margin-bottom: 1.5em;
+  margin-bottom: 1.15em;
+}
+
+.prose ul,
+.prose ol {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+}
+
+.prose li {
+  margin-top: 0.2em;
+  margin-bottom: 0.2em;
 }
 
 .prose code,
@@ -329,13 +338,25 @@ body {
   position: relative;
 }
 
-.prose h2:hover::before,
-.prose h3:hover::before {
-  content: "#";
+.heading-anchor {
   position: absolute;
   right: calc(100% + 0.4rem);
   color: var(--sand-8);
   font-weight: 400;
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  cursor: pointer;
+}
+
+.prose h2:hover .heading-anchor,
+.prose h3:hover .heading-anchor,
+.heading-anchor:hover {
+  opacity: 1;
+}
+
+.heading-anchor:hover {
+  color: var(--sand-11);
 }
 
 /* ===== Blockquote upgrade ===== */
@@ -453,6 +474,17 @@ body {
 .code-copy-btn:hover {
   background-color: var(--sand-3);
   color: var(--sand-12);
+}
+
+/* ===== Prose links ===== */
+.prose a {
+  color: var(--blue-11);
+  text-decoration: none;
+}
+
+.prose a:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--blue-11);
 }
 
 /* ===== External link icon ===== */

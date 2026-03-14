@@ -427,6 +427,22 @@ const readingTime = estimateReadingTime(post.content);
     }
   });
 
+  // Heading anchor links (click to copy URL)
+  headingEls.forEach((h) => {
+    const anchor = document.createElement('a');
+    anchor.className = 'heading-anchor';
+    anchor.href = `#${h.id}`;
+    anchor.textContent = '#';
+    anchor.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const url = `${location.origin}${location.pathname}#${h.id}`;
+      await navigator.clipboard.writeText(url);
+      anchor.textContent = '✓';
+      setTimeout(() => { anchor.textContent = '#'; }, 1500);
+    });
+    h.prepend(anchor);
+  });
+
   // Code block copy buttons
   document.querySelectorAll('.prose .shiki').forEach((block) => {
     const wrapper = document.createElement('div');

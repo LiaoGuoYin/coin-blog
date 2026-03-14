@@ -32,8 +32,15 @@ function readMarkdownFiles(dir: string, type: 'post' | 'memo'): Post[] {
         slug,
         content,
         type,
-      } satisfies Post;
+        published: data.published,
+      };
     })
+    .filter((item) => {
+      // Posts require published: true; memos are always shown
+      if (type === 'post') return item.published === true;
+      return true;
+    })
+    .map(({ published, ...rest }) => rest satisfies Post)
     .sort((a, b) => {
       // Sort by date descending
       return b.date.localeCompare(a.date);

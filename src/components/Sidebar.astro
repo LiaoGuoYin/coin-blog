@@ -24,18 +24,18 @@ function isActive(href: string): boolean {
 }
 ---
 
-<aside class="hidden lg:flex lg:flex-col lg:w-60 xl:w-72 p-3 min-h-screen scrollable-area">
+<aside class="hidden lg:flex lg:flex-col lg:w-48 xl:w-56 p-3 min-h-screen scrollable-area">
   <!-- Logo + Title -->
-  <div class="flex flex-col items-center gap-2 py-6">
-    <a href="/">
+  <div class="flex items-center gap-2.5 py-6 px-2">
+    <a href="/" class="shrink-0">
       <img
         src="/avatar.svg"
         alt="Coin's Blog"
-        class="w-20 h-20 rounded-full object-cover shadow-border"
+        class="w-10 h-10 rounded-full object-cover"
         style="box-shadow: 0 0 0 2px var(--sand-6);"
       />
     </a>
-    <h1 class="text-lg font-semibold" style="color: var(--bronze-12);">
+    <h1 class="text-sm font-semibold" style="color: var(--bronze-12);">
       Coin's Blog
     </h1>
   </div>
@@ -64,7 +64,7 @@ function isActive(href: string): boolean {
   </nav>
 
   <!-- Theme Toggle at bottom -->
-  <div class="mt-auto pt-4 pb-2 flex justify-center">
+  <div class="mt-auto pt-4 pb-2 flex justify-start px-2">
     <ThemeToggle />
   </div>
 </aside>
