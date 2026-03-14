@@ -1,22 +1,110 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import PostList from '../../components/PostList.astro';
-import { getAllMemos } from '../../lib/posts';
+import { getAllMemos, formatDate } from '../../lib/posts';
 
 const memos = getAllMemos();
 ---
 
 <Layout title="Memos — Coin's Blog">
-  <div class="p-4 sm:p-6 flex flex-col gap-6">
+  <div class="p-5 sm:p-8 flex flex-col gap-6">
     <section>
       <h2 class="text-base font-semibold mb-4" style="color: var(--bronze-12);">
         Memos
       </h2>
       {memos.length > 0 ? (
-        <PostList posts={memos} />
+        <div class="timeline">
+          {memos.map((memo, i) => (
+            <div class="tl-item">
+              <div class="tl-marker">
+                <span class="tl-dot"></span>
+                {i < memos.length - 1 && <span class="tl-line"></span>}
+              </div>
+              <a href={`/${memo.slug}`} class="tl-content">
+                <span class="tl-date">{formatDate(memo.date)}</span>
+                <span class="tl-title">{memo.title}</span>
+              </a>
+            </div>
+          ))}
+        </div>
       ) : (
         <p class="text-sm" style="color: var(--sand-11);">No memos yet.</p>
       )}
     </section>
   </div>
 </Layout>
+
+<style>
+  .timeline {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tl-item {
+    display: flex;
+    gap: 1rem;
+    position: relative;
+  }
+
+  .tl-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 1rem;
+    padding-top: 0.45rem;
+  }
+
+  .tl-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--sand-6);
+    flex-shrink: 0;
+    transition: background-color 0.2s, transform 0.2s;
+    z-index: 1;
+  }
+
+  .tl-item:hover .tl-dot {
+    background-color: var(--bronze-9);
+    transform: scale(1.3);
+  }
+
+  .tl-line {
+    width: 2px;
+    flex: 1;
+    background-color: var(--sand-5);
+    border-radius: 1px;
+  }
+
+  .tl-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.35rem 0.75rem 1.25rem 0;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    flex: 1;
+    transition: background-color 0.15s;
+  }
+
+  .tl-content:hover {
+    background-color: var(--sand-3);
+    padding-left: 0.75rem;
+  }
+
+  .tl-date {
+    font-size: 0.75rem;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    color: var(--sand-9);
+  }
+
+  .tl-title {
+    font-size: 0.875rem;
+    color: var(--sand-12);
+    line-height: 1.4;
+  }
+
+  .tl-content:hover .tl-title {
+    color: var(--bronze-12);
+  }
+</style>

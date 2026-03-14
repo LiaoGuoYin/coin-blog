@@ -1,0 +1,66 @@
+---
+import { formatDate, estimateReadingTime } from '../lib/posts';
+import type { Post } from '../lib/posts';
+
+interface Props {
+  posts: Post[];
+}
+
+const { posts } = Astro.props;
+---
+
+<ul class="twoline-list">
+  {posts.map((post) => (
+    <li>
+      <a href={`/${post.slug}`} class="twoline-item">
+        <span class="twoline-title">{post.title}</span>
+        <span class="twoline-meta">
+          {formatDate(post.date)} · 约 {estimateReadingTime(post.content)} 分钟
+        </span>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .twoline-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .twoline-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.6rem 0.65rem;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: background-color 0.15s;
+    border-bottom: 1px solid var(--sand-4);
+  }
+
+
+  .twoline-item:hover {
+    background-color: var(--sand-3);
+  }
+
+  .twoline-title {
+    font-size: 0.875rem;
+    color: var(--sand-12);
+    line-height: 1.4;
+  }
+
+  .twoline-item:hover .twoline-title {
+    color: var(--bronze-12);
+  }
+
+  .twoline-meta {
+    font-size: 0.75rem;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    color: var(--sand-9);
+  }
+</style>

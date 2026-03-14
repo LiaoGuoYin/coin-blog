@@ -1,0 +1,102 @@
+---
+import { formatDate } from '../lib/posts';
+import type { Post } from '../lib/posts';
+
+interface Props {
+  posts: Post[];
+}
+
+const { posts } = Astro.props;
+
+function getExcerpt(content: string, maxLen = 80): string {
+  // Strip markdown syntax for a plain-text preview
+  const plain = content
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/!\[.*?\]\(.*?\)/g, '')
+    .replace(/\[([^\]]+)\]\(.*?\)/g, '$1')
+    .replace(/[*_~`>]/g, '')
+    .replace(/\n+/g, ' ')
+    .trim();
+  if (plain.length <= maxLen) return plain;
+  return plain.slice(0, maxLen) + '…';
+}
+---
+
+<ul class="preview-list">
+  {posts.map((post) => (
+    <li>
+      <a href={`/${post.slug}`} class="preview-item">
+        <div class="preview-header">
+          <span class="preview-title">{post.title}</span>
+          <span class="preview-date">{formatDate(post.date)}</span>
+        </div>
+        <p class="preview-excerpt">{getExcerpt(post.content)}</p>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .preview-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .preview-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.75rem 0.65rem;
+    border-bottom: 1px solid var(--sand-4);
+    text-decoration: none;
+    border-radius: 0.25rem;
+    transition: background-color 0.15s;
+  }
+
+  .preview-list li:last-child .preview-item {
+    border-bottom: none;
+  }
+
+  .preview-item:hover {
+    background-color: var(--sand-3);
+  }
+
+  .preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .preview-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--sand-12);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
+
+  .preview-item:hover .preview-title {
+    color: var(--bronze-12);
+  }
+
+  .preview-date {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    color: var(--sand-9);
+  }
+
+  .preview-excerpt {
+    font-size: 0.8rem;
+    color: var(--sand-9);
+    line-height: 1.5;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>

@@ -1,0 +1,69 @@
+---
+import { formatDate } from '../lib/posts';
+import type { Post } from '../lib/posts';
+
+interface Props {
+  posts: Post[];
+}
+
+const { posts } = Astro.props;
+---
+
+<ul class="divided-list">
+  {posts.map((post) => (
+    <li>
+      <a href={`/${post.slug}`} class="divided-item">
+        <span class="divided-title">{post.title}</span>
+        <span class="divided-date">{formatDate(post.date)}</span>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .divided-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .divided-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 0.65rem 0.5rem;
+    border-bottom: 1px solid var(--sand-4);
+    text-decoration: none;
+    transition: background-color 0.15s;
+    border-radius: 0.25rem;
+  }
+
+  .divided-list li:last-child .divided-item {
+    border-bottom: none;
+  }
+
+  .divided-item:hover {
+    background-color: var(--sand-3);
+  }
+
+  .divided-title {
+    font-size: 0.875rem;
+    color: var(--sand-12);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
+
+  .divided-item:hover .divided-title {
+    color: var(--bronze-12);
+  }
+
+  .divided-date {
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    color: var(--sand-9);
+  }
+</style>

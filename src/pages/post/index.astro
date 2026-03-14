@@ -1,19 +1,27 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import PostList from '../../components/PostList.astro';
 import { getAllPosts } from '../../lib/posts';
+import { siteConfig } from '../../lib/config';
+import PostListDivided from '../../components/PostListDivided.astro';
+import PostListTwoLine from '../../components/PostListTwoLine.astro';
+import PostListPreview from '../../components/PostListPreview.astro';
 
 const posts = getAllPosts();
+const style = siteConfig.postListStyle;
 ---
 
 <Layout title="All Posts — Coin's Blog">
-  <div class="p-4 sm:p-6 flex flex-col gap-6">
+  <div class="p-5 sm:p-8 flex flex-col gap-6">
     <section>
       <h2 class="text-base font-semibold mb-4" style="color: var(--bronze-12);">
         All Posts
       </h2>
       {posts.length > 0 ? (
-        <PostList posts={posts} />
+        <>
+          {style === 'divided' && <PostListDivided posts={posts} />}
+          {style === 'twoLine' && <PostListTwoLine posts={posts} />}
+          {style === 'preview' && <PostListPreview posts={posts} />}
+        </>
       ) : (
         <p class="text-sm" style="color: var(--sand-11);">No posts yet.</p>
       )}
