@@ -1,0 +1,574 @@
+---
+import { getAllPosts } from '../lib/posts';
+import { getPostDateSet, getPostDateSlugMap, generateGrid } from '../lib/activity';
+import { siteConfig } from '../lib/config';
+
+const WEEKS = 5;
+const posts = getAllPosts();
+const postDates = getPostDateSet(posts);
+const postSlugMap = getPostDateSlugMap(posts);
+const { cells, monthLabels } = generateGrid(WEEKS);
+
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+// All post dates (for full-screen view, passed as JSON)
+const allPostDates = Array.from(postDates);
+---
+
+<div
+  class="activity-graph"
+  data-api={siteConfig.memosApiUrl}
+  data-post-slugs={JSON.stringify(postSlugMap)}
+  data-post-dates={JSON.stringify(allPostDates)}
+>
+  <!-- Month labels -->
+  <div class="activity-months" style={`grid-template-columns: repeat(${WEEKS}, 1fr);`}>
+    {monthLabels.map(({ text, col }) => (
+      <span style={`grid-column: ${col + 1};`}>{text}</span>
+    ))}
+  </div>
+
+  <!-- Grid -->
+  <div class="activity-grid" style={`grid-template-columns: repeat(${WEEKS}, 1fr);`}>
+    {cells.map((cell) => {
+      const hasPost = postDates.has(cell.date);
+      const isFuture = cell.date > todayStr;
+      return (
+        <div
+          class:list={[
+            'activity-cell',
+            { 'activity-post': hasPost && !isFuture },
+            { 'activity-future': isFuture },
+          ]}
+          data-date={cell.date}
+          data-type={hasPost && !isFuture ? 'post' : undefined}
+        />
+      );
+    })}
+  </div>
+
+  <!-- Expand button -->
+  <button class="activity-expand" id="activity-expand-btn" title="View full activity">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" />
+      <line x1="21" y1="3" x2="14" y2="10" /><line x1="3" y1="21" x2="10" y2="14" />
+    </svg>
+  </button>
+
+  <!-- Tooltip (shared by sidebar & modal) -->
+  <div class="activity-tooltip" id="activity-tooltip"></div>
+</div>
+
+<!-- Full-screen modal -->
+<div class="activity-modal-overlay" id="activity-modal">
+  <div class="activity-modal">
+    <div class="activity-modal-header">
+      <h2>Activity</h2>
+      <button class="activity-modal-close" id="activity-modal-close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+    <div class="activity-modal-body" id="activity-modal-body"></div>
+  </div>
+</div>
+
+<style is:global>
+  .activity-graph {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    position: relative;
+  }
+
+  .activity-months {
+    display: grid;
+    grid-template-rows: 1fr;
+    font-size: 9px;
+    color: var(--sand-9);
+    line-height: 1;
+    padding-bottom: 1px;
+  }
+
+  .activity-months span {
+    white-space: nowrap;
+  }
+
+  .activity-grid {
+    display: grid;
+    grid-template-rows: repeat(7, 1fr);
+    grid-auto-flow: column;
+    gap: 3px;
+  }
+
+  .activity-cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background-color: var(--sand-4);
+    transition: background-color 0.3s;
+    cursor: default;
+  }
+
+  .activity-cell.activity-future {
+    visibility: hidden;
+  }
+
+  .activity-cell.activity-post,
+  .activity-cell.activity-memo {
+    background-color: var(--grass-7);
+    cursor: pointer;
+  }
+
+  .activity-cell.activity-both {
+    background-color: var(--grass-9);
+    cursor: pointer;
+  }
+
+  .activity-cell:hover:not(.activity-future) {
+    outline: 1px solid var(--sand-8);
+    outline-offset: -1px;
+  }
+
+  /* Expand button */
+  .activity-expand {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    padding: 2px;
+    color: var(--sand-8);
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: color 0.15s;
+    line-height: 0;
+  }
+
+  .activity-expand:hover {
+    color: var(--sand-11);
+  }
+
+  /* Tooltip */
+  .activity-tooltip {
+    position: absolute;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: var(--sand-12);
+    color: var(--sand-1);
+    font-size: 11px;
+    line-height: 1.4;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 1000;
+  }
+
+  .activity-tooltip.visible {
+    opacity: 1;
+  }
+
+  /* Modal overlay */
+  .activity-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+  }
+
+  .activity-modal-overlay.open {
+    display: flex;
+  }
+
+  .activity-modal {
+    background-color: var(--sand-1);
+    border: 1px solid var(--sand-4);
+    border-radius: 1rem;
+    width: fit-content;
+    max-width: calc(100vw - 4rem);
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  }
+
+  .activity-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--sand-4);
+  }
+
+  .activity-modal-header h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--sand-12);
+    margin: 0;
+  }
+
+  .activity-modal-close {
+    color: var(--sand-9);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    line-height: 0;
+    transition: color 0.15s, background-color 0.15s;
+  }
+
+  .activity-modal-close:hover {
+    color: var(--sand-12);
+    background-color: var(--sand-3);
+  }
+
+  .activity-modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  /* Year section inside modal */
+  .activity-year {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .activity-year-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--sand-11);
+  }
+
+  .activity-year-months {
+    display: grid;
+    grid-template-rows: 1fr;
+    font-size: 9px;
+    color: var(--sand-9);
+    line-height: 1;
+    padding-bottom: 2px;
+  }
+
+  .activity-year-months span {
+    white-space: nowrap;
+  }
+
+  .activity-year-grid {
+    display: grid;
+    grid-template-rows: repeat(7, 1fr);
+    grid-auto-flow: column;
+    gap: 2px;
+  }
+
+  .activity-year-grid .activity-cell {
+    width: 11px;
+    height: 11px;
+    aspect-ratio: auto;
+  }
+
+  /* Legend */
+  .activity-legend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: var(--sand-9);
+    justify-content: flex-end;
+    padding-top: 0.5rem;
+  }
+
+  .activity-legend-cell {
+    width: 11px;
+    height: 11px;
+    border-radius: 2px;
+  }
+</style>
+
+<script>
+  const graph = document.querySelector<HTMLDivElement>('.activity-graph');
+  if (graph) {
+    const apiUrl = graph.dataset.api!;
+    const postSlugs: Record<string, string> = JSON.parse(graph.dataset.postSlugs || '{}');
+    const postDateSet = new Set<string>(JSON.parse(graph.dataset.postDates || '[]'));
+    const tooltip = document.getElementById('activity-tooltip')!;
+    const sidebarGrid = graph.querySelector<HTMLDivElement>('.activity-grid')!;
+
+    // Shared memo dates (populated once, used by both sidebar and modal)
+    let memoDates = new Set<string>();
+    let memosFetched = false;
+
+    // --- Tooltip logic (works for any grid) ---
+    function getTypeLabel(cell: HTMLElement): string {
+      const type = cell.dataset.type;
+      if (type === 'both') return 'Post & Memo';
+      if (type === 'post') return 'Post';
+      if (type === 'memo') return 'Memo';
+      return 'No activity';
+    }
+
+    function attachTooltip(container: HTMLElement, tooltipEl: HTMLElement) {
+      container.addEventListener('mouseover', (e) => {
+        const cell = (e.target as HTMLElement).closest<HTMLDivElement>('.activity-cell');
+        if (!cell || cell.classList.contains('activity-future')) {
+          tooltipEl.classList.remove('visible');
+          return;
+        }
+
+        const date = cell.dataset.date!;
+        const label = getTypeLabel(cell);
+        tooltipEl.textContent = `${date} · ${label}`;
+
+        const containerRect = tooltipEl.offsetParent!.getBoundingClientRect();
+        const cellRect = cell.getBoundingClientRect();
+        const centerX = cellRect.left + cellRect.width / 2 - containerRect.left;
+        const topY = cellRect.top - containerRect.top;
+
+        tooltipEl.style.left = `${centerX}px`;
+        tooltipEl.style.top = `${topY - 6}px`;
+        tooltipEl.style.transform = 'translate(-50%, -100%)';
+        tooltipEl.classList.add('visible');
+      });
+
+      container.addEventListener('mouseleave', () => {
+        tooltipEl.classList.remove('visible');
+      });
+    }
+
+    // --- Click navigation (works for any grid) ---
+    function attachClick(container: HTMLElement) {
+      container.addEventListener('click', (e) => {
+        const cell = (e.target as HTMLElement).closest<HTMLDivElement>('.activity-cell');
+        if (!cell) return;
+        const date = cell.dataset.date!;
+        const type = cell.dataset.type;
+
+        if (type === 'post' || type === 'both') {
+          const slug = postSlugs[date];
+          if (slug) { window.location.href = `/${slug}`; return; }
+        }
+        if (type === 'memo' || type === 'both') {
+          window.location.href = '/memo';
+        }
+      });
+    }
+
+    // Attach to sidebar grid
+    attachTooltip(sidebarGrid, tooltip);
+    attachClick(sidebarGrid);
+
+    // --- Fetch memo dates ---
+    async function fetchMemoDates(): Promise<Set<string>> {
+      const dates = new Set<string>();
+      let pageToken = '';
+      try {
+        do {
+          const url = new URL(`${apiUrl}/api/v1/memos`);
+          url.searchParams.set('pageSize', '50');
+          if (pageToken) url.searchParams.set('pageToken', pageToken);
+          const res = await fetch(url.toString());
+          if (!res.ok) break;
+          const data = await res.json();
+          for (const memo of data.memos || []) {
+            const match = memo.displayTime?.match(/^(\d{4}-\d{2}-\d{2})/);
+            if (match) dates.add(match[1]);
+          }
+          pageToken = data.nextPageToken || '';
+        } while (pageToken);
+      } catch { /* silently fail */ }
+      return dates;
+    }
+
+    function applyCellType(cell: HTMLDivElement, hasPost: boolean, hasMemo: boolean) {
+      cell.classList.remove('activity-post', 'activity-memo', 'activity-both');
+      if (hasPost && hasMemo) {
+        cell.classList.add('activity-both');
+        cell.dataset.type = 'both';
+      } else if (hasPost) {
+        cell.classList.add('activity-post');
+        cell.dataset.type = 'post';
+      } else if (hasMemo) {
+        cell.classList.add('activity-memo');
+        cell.dataset.type = 'memo';
+      } else {
+        delete cell.dataset.type;
+      }
+    }
+
+    function updateGridWithMemos(container: HTMLElement, mDates: Set<string>) {
+      container.querySelectorAll<HTMLDivElement>('.activity-cell').forEach((cell) => {
+        const date = cell.dataset.date!;
+        const hasMemo = mDates.has(date);
+        const hasPost = postDateSet.has(date);
+        if (hasMemo) applyCellType(cell, hasPost, true);
+      });
+    }
+
+    // Fetch and apply to sidebar
+    fetchMemoDates().then((dates) => {
+      memoDates = dates;
+      memosFetched = true;
+      updateGridWithMemos(sidebarGrid, memoDates);
+    });
+
+    // --- Full-screen modal ---
+    const modal = document.getElementById('activity-modal')!;
+    const modalBody = document.getElementById('activity-modal-body')!;
+    const expandBtn = document.getElementById('activity-expand-btn')!;
+    const closeBtn = document.getElementById('activity-modal-close')!;
+
+    function todayStr(): string {
+      const t = new Date();
+      return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+    }
+
+    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    function generateYearGrid(year: number): HTMLElement {
+      const section = document.createElement('div');
+      section.className = 'activity-year';
+
+      // Year label
+      const label = document.createElement('div');
+      label.className = 'activity-year-label';
+      label.textContent = String(year);
+      section.appendChild(label);
+
+      // Compute weeks for this year
+      const jan1 = new Date(year, 0, 1);
+      const dec31 = new Date(year, 11, 31);
+      const today = todayStr();
+
+      // Start from the Monday on or before Jan 1
+      const jan1Day = jan1.getDay(); // 0=Sun
+      const startOffset = jan1Day === 0 ? 6 : jan1Day - 1; // days since Monday
+      const startDate = new Date(jan1);
+      startDate.setDate(startDate.getDate() - startOffset);
+
+      // End on the Sunday on or after Dec 31
+      const dec31Day = dec31.getDay();
+      const endOffset = dec31Day === 0 ? 0 : 7 - dec31Day;
+      const endDate = new Date(dec31);
+      endDate.setDate(endDate.getDate() + endOffset);
+
+      // Calculate total weeks
+      const totalDays = Math.round((endDate.getTime() - startDate.getTime()) / 86400000) + 1;
+      const totalWeeks = Math.ceil(totalDays / 7);
+
+      // Month labels
+      const monthsRow = document.createElement('div');
+      monthsRow.className = 'activity-year-months';
+      monthsRow.style.gridTemplateColumns = `repeat(${totalWeeks}, 11px)`;
+      monthsRow.style.gap = '2px';
+      let lastMonth = -1;
+      for (let col = 0; col < totalWeeks; col++) {
+        const d = new Date(startDate);
+        d.setDate(startDate.getDate() + col * 7);
+        if (d.getMonth() !== lastMonth) {
+          lastMonth = d.getMonth();
+          const span = document.createElement('span');
+          span.style.gridColumn = String(col + 1);
+          span.textContent = MONTHS[d.getMonth()];
+          monthsRow.appendChild(span);
+        }
+      }
+      section.appendChild(monthsRow);
+
+      // Grid
+      const grid = document.createElement('div');
+      grid.className = 'activity-year-grid';
+      grid.style.gridTemplateColumns = `repeat(${totalWeeks}, 11px)`;
+
+      for (let col = 0; col < totalWeeks; col++) {
+        for (let row = 0; row < 7; row++) {
+          const d = new Date(startDate);
+          d.setDate(startDate.getDate() + col * 7 + row);
+          const yyyy = d.getFullYear();
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          const dateStr = `${yyyy}-${mm}-${dd}`;
+
+          const cell = document.createElement('div');
+          cell.className = 'activity-cell';
+          cell.dataset.date = dateStr;
+
+          const isFuture = dateStr > today;
+          const outOfYear = yyyy !== year;
+
+          if (isFuture || outOfYear) {
+            cell.classList.add('activity-future');
+          } else {
+            const hasPost = postDateSet.has(dateStr);
+            const hasMemo = memoDates.has(dateStr);
+            applyCellType(cell, hasPost, hasMemo);
+          }
+
+          grid.appendChild(cell);
+        }
+      }
+
+      section.appendChild(grid);
+      return section;
+    }
+
+    function openModal() {
+      modalBody.innerHTML = '';
+
+      // Move tooltip into modal for correct positioning
+      modal.style.position = 'fixed';
+      const modalTooltip = document.createElement('div');
+      modalTooltip.className = 'activity-tooltip';
+      modalTooltip.id = 'activity-modal-tooltip';
+
+      const currentYear = new Date().getFullYear();
+      for (let y = currentYear; y >= currentYear - 9; y--) {
+        const yearSection = generateYearGrid(y);
+        modalBody.appendChild(yearSection);
+        attachTooltip(yearSection, modalTooltip);
+        attachClick(yearSection);
+      }
+
+      // Legend
+      const legend = document.createElement('div');
+      legend.className = 'activity-legend';
+      legend.innerHTML = `
+        <span>Less</span>
+        <div class="activity-legend-cell" style="background-color: var(--sand-4);"></div>
+        <div class="activity-legend-cell" style="background-color: var(--grass-7);"></div>
+        <div class="activity-legend-cell" style="background-color: var(--grass-9);"></div>
+        <span>More</span>
+      `;
+      modalBody.appendChild(legend);
+
+      modalBody.appendChild(modalTooltip);
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    expandBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+  }
+</script>

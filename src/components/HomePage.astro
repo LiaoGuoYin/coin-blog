@@ -358,7 +358,7 @@ const style = siteConfig.postListStyle;
   });
 
   function handlePath() {
-    const path = window.location.pathname;
+    const path = window.location.pathname.replace(/\/+$/, '');
     switchTab(path === '/memo' ? 'memos' : 'posts');
   }
 
