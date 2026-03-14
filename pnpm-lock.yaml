@@ -29,6 +29,9 @@ importers:
       markdown-it-anchor:
         specifier: ^9.2.0
         version: 9.2.0(@types/markdown-it@14.1.2)(markdown-it@14.1.1)
+      markdown-it-github-alerts:
+        specifier: ^1.0.1
+        version: 1.0.1(markdown-it@14.1.1)
       shiki:
         specifier: ^4.0.2
         version: 4.0.2
@@ -1544,6 +1547,11 @@ packages:
     peerDependencies:
       '@types/markdown-it': '*'
       markdown-it: '*'
+
+  markdown-it-github-alerts@1.0.1:
+    resolution: {integrity: sha512-NNATF4QdoGI07hyCitoB2YqJ1YcNVCKT89ut2VtfFY9rkeFCXe/V2lOonKQLpJiq5DjiZZepf97BJx5xOjFIAw==}
+    peerDependencies:
+      markdown-it: '>= 13.0.0'
 
   markdown-it@14.1.1:
     resolution: {integrity: sha512-BuU2qnTti9YKgK5N+IeMubp14ZUKUUw7yeJbkjtosvHiP0AZ5c8IAgEMk79D0eC8F23r4Ac/q8cAIFdm2FtyoA==}
@@ -3513,6 +3521,10 @@ snapshots:
   markdown-it-anchor@9.2.0(@types/markdown-it@14.1.2)(markdown-it@14.1.1):
     dependencies:
       '@types/markdown-it': 14.1.2
+      markdown-it: 14.1.1
+
+  markdown-it-github-alerts@1.0.1(markdown-it@14.1.1):
+    dependencies:
       markdown-it: 14.1.1
 
   markdown-it@14.1.1:
