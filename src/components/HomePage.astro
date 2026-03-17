@@ -85,7 +85,7 @@ const style = siteConfig.postListStyle;
     padding-bottom: 0;
   }
 
-  /* Dot positioned on the line, aligned with card top */
+  /* Dot / anchor button on the timeline */
   .tl-dot {
     position: absolute;
     left: -1.5rem;
@@ -96,9 +96,99 @@ const style = siteConfig.postListStyle;
     background-color: var(--sand-6);
     transition: background-color 0.2s, transform 0.2s;
     z-index: 1;
+    border: none;
+    padding: 0;
   }
 
-  .tl-item:hover .tl-dot {
+  button.tl-anchor {
+    cursor: pointer;
+    /* Larger hit area for easier clicking */
+    width: 20px;
+    height: 20px;
+    left: calc(-1.5rem - 6px);
+    top: -6px;
+    background: transparent;
+  }
+
+  button.tl-anchor::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--sand-6);
+    transition: background-color 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+    box-shadow: 0 0 0 0 transparent;
+  }
+
+  .tl-item:hover button.tl-anchor::after {
+    background-color: var(--bronze-9);
+    transform: translate(-50%, -50%) scale(1.3);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--bronze-9) 20%, transparent);
+  }
+
+  /* Tooltip — slide up + fade in */
+  button.tl-anchor::before {
+    content: '复制链接';
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 4px);
+    transform: translateX(-50%) translateY(4px);
+    font-size: 0.7rem;
+    white-space: nowrap;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.25rem;
+    background-color: var(--sand-12);
+    color: var(--sand-1);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  button.tl-anchor:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Copied feedback — pop + sustained glow */
+  button.tl-anchor.tl-anchor-copied::before {
+    content: '已复制 ✓';
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  button.tl-anchor.tl-anchor-copied::after {
+    background-color: var(--grass-9);
+    animation: anchor-pop 1.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  @keyframes anchor-pop {
+    0%   { transform: translate(-50%, -50%) scale(2);   box-shadow: 0 0 0 10px color-mix(in srgb, var(--grass-9) 35%, transparent); }
+    15%  { transform: translate(-50%, -50%) scale(1.15); box-shadow: 0 0 0 4px color-mix(in srgb, var(--grass-9) 25%, transparent); }
+    25%  { transform: translate(-50%, -50%) scale(1.5);  box-shadow: 0 0 0 6px color-mix(in srgb, var(--grass-9) 20%, transparent); }
+    40%  { transform: translate(-50%, -50%) scale(1.3);  box-shadow: 0 0 0 5px color-mix(in srgb, var(--grass-9) 18%, transparent); }
+    70%  { transform: translate(-50%, -50%) scale(1.3);  box-shadow: 0 0 0 5px color-mix(in srgb, var(--grass-9) 15%, transparent); }
+    100% { transform: translate(-50%, -50%) scale(1);    box-shadow: 0 0 0 0 transparent; }
+  }
+
+  /* Highlight when scrolled to / copied — hold then fade */
+  .tl-highlight {
+    border-color: var(--bronze-7) !important;
+    box-shadow: 0 0 0 2px var(--bronze-4) !important;
+    animation: anchor-highlight 2.5s ease-out forwards;
+  }
+
+  @keyframes anchor-highlight {
+    0%   { border-color: var(--bronze-9); box-shadow: 0 0 0 4px color-mix(in srgb, var(--bronze-7) 35%, transparent); }
+    15%  { border-color: var(--bronze-8); box-shadow: 0 0 0 3px color-mix(in srgb, var(--bronze-7) 25%, transparent); }
+    55%  { border-color: var(--bronze-7); box-shadow: 0 0 0 2px var(--bronze-4); }
+    100% { border-color: var(--sand-4);   box-shadow: 0 0 0 0 transparent; }
+  }
+
+  .tl-item:hover .tl-dot:not(.tl-anchor) {
     background-color: var(--bronze-9);
     transform: scale(1.3);
   }
@@ -274,15 +364,21 @@ const style = siteConfig.postListStyle;
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
+  function getMemoId(memo: Memo): string {
+    // memo.name is like "memos/123"
+    return memo.name.replace('/', '-');
+  }
+
   function renderMemoItem(renderer: MarkdownIt, memo: Memo): string {
     const html = renderer.render(memo.content);
+    const id = getMemoId(memo);
     const tagsHtml = memo.tags.length > 0
       ? `<div class="tl-tags">${memo.tags.map((t) => `<span class="tl-tag">#${t}</span>`).join('')}</div>`
       : '';
 
     return `
-      <div class="tl-item">
-        <span class="tl-dot"></span>
+      <div class="tl-item" id="${id}">
+        <button class="tl-dot tl-anchor" data-id="${id}" title="复制链接" aria-label="复制此条 Memo 的链接"></button>
         <div class="tl-content">
           <span class="tl-date">${formatDate(memo.displayTime)}</span>
           ${tagsHtml}
@@ -330,7 +426,8 @@ const style = siteConfig.postListStyle;
 
   function handlePath() {
     const path = window.location.pathname.replace(/\/+$/, '');
-    switchTab(path === '/memo' ? 'memos' : 'posts');
+    const hasMemoHash = location.hash.startsWith('#memos-');
+    switchTab(path === '/memo' || hasMemoHash ? 'memos' : 'posts');
   }
 
   // --- Memos: 直连 Memos API ---
@@ -356,6 +453,27 @@ const style = siteConfig.postListStyle;
       loading.classList.add('tab-hidden');
       list.classList.remove('tab-hidden');
       memosLoaded = true;
+
+      // Anchor click → copy link
+      list.addEventListener('click', (e) => {
+        const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.tl-anchor');
+        if (!btn) return;
+        const id = btn.dataset.id!;
+        const url = `${location.origin}/memo#${id}`;
+        navigator.clipboard.writeText(url).then(() => {
+          btn.classList.add('tl-anchor-copied');
+          setTimeout(() => btn.classList.remove('tl-anchor-copied'), 1500);
+
+          const card = btn.closest('.tl-item')?.querySelector('.tl-content');
+          card?.classList.remove('tl-highlight');
+          void (card as HTMLElement)?.offsetWidth; // reflow to restart animation
+          card?.classList.add('tl-highlight');
+          card?.addEventListener('animationend', () => card.classList.remove('tl-highlight'), { once: true });
+        });
+      });
+
+      // Scroll to anchor if hash present
+      scrollToHash();
     } catch {
       loading.classList.add('tab-hidden');
       error.classList.remove('tab-hidden');
@@ -386,6 +504,18 @@ const style = siteConfig.postListStyle;
     });
 
     return allMemos;
+  }
+
+  function scrollToHash() {
+    const hash = location.hash.slice(1);
+    if (!hash) return;
+    const el = document.getElementById(hash);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const card = el.querySelector('.tl-content');
+      card?.classList.add('tl-highlight');
+      card?.addEventListener('animationend', () => card.classList.remove('tl-highlight'), { once: true });
+    }
   }
 
   handlePath();
