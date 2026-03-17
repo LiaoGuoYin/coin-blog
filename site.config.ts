@@ -57,8 +57,8 @@ export const siteConfig = {
   postListStyle: "twoLine" as "divided" | "twoLine" | "preview",
 
   /** 每页显示条数 */
-  postsPerPage: 10,
-  memosPerPage: 10,
+  postsPerPage: 20,
+  memosPerPage: 20,
 
   /** Memos API 地址(public memo only) */
   memosApiUrl: "https://memo.nas.hz.moyumomokan.cn",
