@@ -13,7 +13,7 @@ const style = siteConfig.postListStyle;
 <Layout title={siteConfig.title}>
   <div class="p-5 sm:p-8 flex flex-col gap-4">
     <!-- Posts tab -->
-    <section id="tab-posts">
+    <section id="tab-posts" data-page-size={String(siteConfig.postsPerPage)}>
       <h2 class="text-base font-semibold mb-4" style="color: var(--bronze-12);">
         {siteConfig.ui.postsHeading}
       </h2>
@@ -21,10 +21,17 @@ const style = siteConfig.postListStyle;
       {style === 'divided' && <PostListDivided posts={allPosts} />}
       {style === 'twoLine' && <PostListTwoLine posts={allPosts} />}
       {style === 'preview' && <PostListPreview posts={allPosts} />}
+
+      <!-- Posts load more -->
+      <div id="posts-load-more" class="tab-hidden" style="text-align: center; padding: 1rem 0;">
+        <button id="posts-load-more-btn" class="load-more-btn">
+          {siteConfig.ui.loadMore}
+        </button>
+      </div>
     </section>
 
     <!-- Memos tab -->
-    <section id="tab-memos" class="tab-hidden" data-api={siteConfig.memosApiUrl}>
+    <section id="tab-memos" class="tab-hidden" data-api={siteConfig.memosApiUrl} data-page-size={String(siteConfig.memosPerPage)}>
       <h2 class="text-base font-semibold mb-4" style="color: var(--bronze-12);">
         {siteConfig.ui.memosHeading}
       </h2>
@@ -49,6 +56,19 @@ const style = siteConfig.postListStyle;
 
       <!-- Memo list (populated by JS) -->
       <div id="memo-list" class="timeline tab-hidden"></div>
+
+      <!-- Load more -->
+      <div id="memo-load-more" class="tab-hidden" style="text-align: center; padding: 1rem 0;">
+        <button
+          id="memo-load-more-btn"
+          class="load-more-btn"
+          data-load-more={siteConfig.ui.loadMore}
+          data-loading={siteConfig.ui.loading}
+          data-no-more={siteConfig.ui.noMore}
+        >
+          {siteConfig.ui.loadMore}
+        </button>
+      </div>
     </section>
   </div>
 </Layout>
@@ -330,9 +350,42 @@ const style = siteConfig.postListStyle;
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
   }
+
+  /* Load more button */
+  .load-more-btn {
+    font-size: 0.8rem;
+    color: var(--sand-11);
+    background: var(--sand-3);
+    border: 1px solid var(--sand-6);
+    border-radius: 0.5rem;
+    padding: 0.4rem 1.5rem;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+  }
+
+  .load-more-btn:hover:not(:disabled) {
+    background: var(--sand-4);
+    border-color: var(--sand-7);
+    color: var(--sand-12);
+  }
+
+  .load-more-btn:disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
 </style>
 
 <script>
+  // --- 立即根据 URL 决定初始可见 tab，避免 Posts → Memos 闪烁 ---
+  {
+    const path = location.pathname.replace(/\/+$/, '');
+    const wantMemos = path === '/memo' || location.hash.startsWith('#memos-');
+    if (wantMemos) {
+      document.getElementById('tab-posts')!.classList.add('tab-hidden');
+      document.getElementById('tab-memos')!.classList.remove('tab-hidden');
+    }
+  }
+
   import MarkdownIt from 'markdown-it';
   import githubAlerts from 'markdown-it-github-alerts';
 
@@ -387,6 +440,50 @@ const style = siteConfig.postListStyle;
       </div>`;
   }
 
+  // --- Posts: 客户端分页（全量 HTML 已渲染，JS 控制可见数量） ---
+  {
+    const section = document.getElementById('tab-posts')!;
+    const pageSize = Number(section.dataset.pageSize) || 10;
+    const list = section.querySelector('ul')!;
+    const allItems = Array.from(list.children) as HTMLElement[];
+    const total = allItems.length;
+    let shown = 0;
+
+    const loadMoreContainer = document.getElementById('posts-load-more')!;
+    const loadMoreBtn = document.getElementById('posts-load-more-btn')! as HTMLButtonElement;
+
+    function showNextPage() {
+      const end = Math.min(shown + pageSize, total);
+      for (let i = shown; i < end; i++) {
+        allItems[i].style.display = '';
+      }
+      shown = end;
+      updatePostsUI();
+    }
+
+    function updatePostsUI() {
+      if (shown >= total) {
+        loadMoreBtn.textContent = '没有更多了';
+        loadMoreBtn.disabled = true;
+      } else {
+        loadMoreContainer.classList.remove('tab-hidden');
+        loadMoreBtn.disabled = false;
+        loadMoreBtn.textContent = '查看更多';
+      }
+    }
+
+    // 初始隐藏超出首页的条目
+    allItems.forEach((item, i) => {
+      if (i >= pageSize) item.style.display = 'none';
+    });
+    shown = Math.min(pageSize, total);
+
+    if (total > pageSize) {
+      loadMoreContainer.classList.remove('tab-hidden');
+      loadMoreBtn.addEventListener('click', showNextPage);
+    }
+  }
+
   // --- Tab switching ---
   const tabPosts = document.getElementById('tab-posts')!;
   const tabMemos = document.getElementById('tab-memos')!;
@@ -430,9 +527,15 @@ const style = siteConfig.postListStyle;
     switchTab(path === '/memo' || hasMemoHash ? 'memos' : 'posts');
   }
 
-  // --- Memos: 直连 Memos API ---
+  // --- Memos: 分页加载 ---
   let memosLoaded = false;
+  let nextPageToken = '';
+  let isLoadingMore = false;
   const apiUrl = tabMemos.dataset.api!;
+  const PAGE_SIZE = Number(tabMemos.dataset.pageSize) || 20;
+
+  const loadMoreContainer = document.getElementById('memo-load-more')!;
+  const loadMoreBtn = document.getElementById('memo-load-more-btn')! as HTMLButtonElement;
 
   async function loadMemos() {
     const loading = document.getElementById('memo-loading')!;
@@ -440,21 +543,23 @@ const style = siteConfig.postListStyle;
     const list = document.getElementById('memo-list')!;
 
     try {
-      // 并行：初始化渲染器 + 获取数据
-      const [renderer, allMemos] = await Promise.all([getMd(), fetchAllMemos()]);
+      const [renderer, { memos, pageToken }] = await Promise.all([getMd(), fetchMemoPage('')]);
 
-      if (allMemos.length === 0) {
+      if (memos.length === 0) {
         loading.classList.add('tab-hidden');
         error.classList.remove('tab-hidden');
         return;
       }
 
-      list.innerHTML = allMemos.map((m) => renderMemoItem(renderer, m)).join('');
+      list.innerHTML = memos.map((m) => renderMemoItem(renderer, m)).join('');
       loading.classList.add('tab-hidden');
       list.classList.remove('tab-hidden');
       memosLoaded = true;
+      nextPageToken = pageToken;
 
-      // Anchor click → copy link
+      updateLoadMoreUI();
+
+      // Anchor click → copy link (事件代理，只绑定一次)
       list.addEventListener('click', (e) => {
         const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.tl-anchor');
         if (!btn) return;
@@ -466,7 +571,7 @@ const style = siteConfig.postListStyle;
 
           const card = btn.closest('.tl-item')?.querySelector('.tl-content');
           card?.classList.remove('tl-highlight');
-          void (card as HTMLElement)?.offsetWidth; // reflow to restart animation
+          void (card as HTMLElement)?.offsetWidth;
           card?.classList.add('tl-highlight');
           card?.addEventListener('animationend', () => card.classList.remove('tl-highlight'), { once: true });
         });
@@ -480,30 +585,65 @@ const style = siteConfig.postListStyle;
     }
   }
 
-  async function fetchAllMemos(): Promise<Memo[]> {
-    const allMemos: Memo[] = [];
-    let pageToken = '';
+  async function loadMoreMemos() {
+    if (isLoadingMore || !nextPageToken) return;
+    isLoadingMore = true;
+    loadMoreBtn.disabled = true;
+    loadMoreBtn.textContent = loadMoreBtn.dataset.loading!;
 
-    do {
-      const url = new URL(`${apiUrl}/api/v1/memos`);
-      url.searchParams.set('pageSize', '50');
-      if (pageToken) url.searchParams.set('pageToken', pageToken);
+    try {
+      const renderer = getMd();
+      const { memos, pageToken } = await fetchMemoPage(nextPageToken);
+      const list = document.getElementById('memo-list')!;
 
-      const res = await fetch(url.toString());
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const fragment = document.createDocumentFragment();
+      const temp = document.createElement('div');
+      temp.innerHTML = memos.map((m) => renderMemoItem(renderer, m)).join('');
+      while (temp.firstChild) fragment.appendChild(temp.firstChild);
+      list.appendChild(fragment);
 
-      const data = await res.json();
-      allMemos.push(...(data.memos || []));
-      pageToken = data.nextPageToken || '';
-    } while (pageToken);
+      nextPageToken = pageToken;
+      updateLoadMoreUI();
+    } catch {
+      loadMoreBtn.textContent = loadMoreBtn.dataset.loadMore + '（重试）';
+      loadMoreBtn.disabled = false;
+    } finally {
+      isLoadingMore = false;
+    }
+  }
 
-    // Pinned first, then newest
-    allMemos.sort((a, b) => {
+  function updateLoadMoreUI() {
+    if (nextPageToken) {
+      loadMoreContainer.classList.remove('tab-hidden');
+      loadMoreBtn.disabled = false;
+      loadMoreBtn.textContent = loadMoreBtn.dataset.loadMore!;
+    } else {
+      loadMoreBtn.textContent = loadMoreBtn.dataset.noMore!;
+      loadMoreBtn.disabled = true;
+    }
+  }
+
+  // 点击按钮加载更多
+  loadMoreBtn.addEventListener('click', loadMoreMemos);
+
+  async function fetchMemoPage(pageToken: string): Promise<{ memos: Memo[]; pageToken: string }> {
+    const url = new URL(`${apiUrl}/api/v1/memos`);
+    url.searchParams.set('pageSize', String(PAGE_SIZE));
+    if (pageToken) url.searchParams.set('pageToken', pageToken);
+
+    const res = await fetch(url.toString());
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+    const memos: Memo[] = data.memos || [];
+
+    // Pinned first, then newest (API 可能已排序，但保险起见本地再排一次)
+    memos.sort((a, b) => {
       if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
       return b.displayTime.localeCompare(a.displayTime);
     });
 
-    return allMemos;
+    return { memos, pageToken: data.nextPageToken || '' };
   }
 
   function scrollToHash() {

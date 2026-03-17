@@ -22,7 +22,11 @@ export const siteConfig = {
     { href: "/post", label: "Post" },
     { href: "/memo", label: "Memo" },
     { href: "/atom.xml", label: "RSS", external: true },
-    { href: "https://github.com/LiaoGuoYin/coin-blog", label: "GitHub", external: true },
+    {
+      href: "https://github.com/LiaoGuoYin/coin-blog",
+      label: "GitHub",
+      external: true,
+    },
   ],
 
   /** UI 文案 */
@@ -36,6 +40,9 @@ export const siteConfig = {
     copiedButton: "已复制",
     noPosts: "No posts yet.",
     noMemos: "No memos yet.",
+    loadMore: "查看更多",
+    loading: "加载中…",
+    noMore: "没有更多了",
     postsHeading: "Posts",
     allPostsHeading: "All Posts",
     memosHeading: "Memos",
@@ -48,6 +55,10 @@ export const siteConfig = {
    * - 'preview'   : 带摘要预览 — 标题 + 日期 + 正文前80字摘要
    */
   postListStyle: "twoLine" as "divided" | "twoLine" | "preview",
+
+  /** 每页显示条数 */
+  postsPerPage: 10,
+  memosPerPage: 10,
 
   /** Memos API 地址(public memo only) */
   memosApiUrl: "https://memo.nas.hz.moyumomokan.cn",
