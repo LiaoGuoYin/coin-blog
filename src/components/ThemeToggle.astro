@@ -2,7 +2,6 @@
 ---
 
 <button
-  id="theme-toggle"
   class="theme-toggle-btn"
   aria-label="Toggle theme"
 >
@@ -53,8 +52,6 @@
 
 <script>
   (function () {
-    const btn = document.getElementById('theme-toggle');
-
     function getEffectiveTheme(): 'light' | 'dark' {
       const stored = localStorage.getItem('theme');
       if (stored === 'dark') return 'dark';
@@ -69,9 +66,11 @@
       try { localStorage.setItem('theme', theme); } catch {}
     }
 
-    btn?.addEventListener('click', () => {
-      const current = getEffectiveTheme();
-      applyTheme(current === 'dark' ? 'light' : 'dark');
+    document.querySelectorAll('.theme-toggle-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const current = getEffectiveTheme();
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+      });
     });
   })();
 </script>
