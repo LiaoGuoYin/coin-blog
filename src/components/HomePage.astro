@@ -57,6 +57,17 @@ const allPosts = getAllPosts();
 
     <script is:inline>
       (function() {
+        // Tab switching: must run synchronously before paint to prevent flash
+        var path = location.pathname.replace(/\/+$/, '');
+        var wantMemos = path === '/memo' || location.hash.indexOf('#memos-') === 0;
+        if (wantMemos) {
+          var tp = document.getElementById('tab-posts');
+          var tm = document.getElementById('tab-memos');
+          if (tp) tp.classList.add('tab-hidden');
+          if (tm) tm.classList.remove('tab-hidden');
+        }
+
+        // Restore saved view toggle (list/grid)
         var saved = localStorage.getItem('post-view');
         if (saved === 'grid') {
           var l = document.getElementById('post-list');
@@ -561,16 +572,6 @@ const allPosts = getAllPosts();
 </style>
 
 <script>
-  // --- 立即根据 URL 决定初始可见 tab，避免 Posts → Memos 闪烁 ---
-  {
-    const path = location.pathname.replace(/\/+$/, '');
-    const wantMemos = path === '/memo' || location.hash.startsWith('#memos-');
-    if (wantMemos) {
-      document.getElementById('tab-posts')!.classList.add('tab-hidden');
-      document.getElementById('tab-memos')!.classList.remove('tab-hidden');
-    }
-  }
-
   import MarkdownIt from 'markdown-it';
   import githubAlerts from 'markdown-it-github-alerts';
 
