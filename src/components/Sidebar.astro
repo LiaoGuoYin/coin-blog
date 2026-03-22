@@ -49,10 +49,10 @@ function isActive(href: string): boolean {
           href={link.href}
           data-tab={tabName}
           class={[
-            'flex items-center gap-2 rounded-xl py-2 px-4 text-sm font-medium transition-colors duration-100',
+            'flex items-center gap-2 rounded-[var(--radius-md)] py-2 px-4 text-sm font-medium transition-colors duration-100',
             active
-              ? 'shadow-border bg-white dark:bg-sand-4'
-              : 'hover:bg-sand-3 dark:hover:bg-sand-4',
+              ? 'sidebar-nav-active'
+              : 'sidebar-nav-inactive',
           ].join(' ')}
           style={`color: ${active ? 'var(--sand-12)' : 'var(--sand-11)'};`}
         >
@@ -78,7 +78,7 @@ function isActive(href: string): boolean {
           href={link.href}
           target="_blank"
           rel="noopener noreferrer"
-          class="sidebar-icon-link"
+          class="icon-link"
           aria-label={link.label}
           title={link.label}
         >
@@ -90,17 +90,14 @@ function isActive(href: string): boolean {
 </aside>
 
 <style>
-  .sidebar-icon-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px;
-    border-radius: 8px;
-    color: var(--sand-9);
-    transition: color 0.15s, background-color 0.15s;
+  .sidebar-nav-active {
+    background-color: var(--ui-bg-panel);
+    box-shadow: 0 0 0 1px var(--ui-border-strong);
   }
-  .sidebar-icon-link:hover {
-    color: var(--sand-12);
-    background-color: var(--sand-3);
+  .sidebar-nav-inactive {
+    /* hover handled inline */
+  }
+  .sidebar-nav-inactive:hover {
+    background-color: var(--ui-bg-hover);
   }
 </style>

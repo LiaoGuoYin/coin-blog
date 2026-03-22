@@ -2,7 +2,7 @@
 ---
 
 <button
-  class="theme-toggle-btn"
+  class="icon-link theme-toggle-btn"
   aria-label="Toggle theme"
 >
   <!-- Sun icon (shown in dark mode) -->
@@ -25,21 +25,7 @@
 
 <style is:global>
   .theme-toggle-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px;
-    border: none;
-    background: none;
-    border-radius: 8px;
-    cursor: pointer;
-    color: var(--sand-9);
-    transition: color 0.15s, background-color 0.15s;
-  }
-
-  .theme-toggle-btn:hover {
-    color: var(--sand-12);
-    background-color: var(--sand-3);
+    /* icon-link base class handles shared styles */
   }
 
   /* Show sun in dark mode, moon in light mode */

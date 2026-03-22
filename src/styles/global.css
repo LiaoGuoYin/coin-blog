@@ -76,6 +76,22 @@
   --grass-10: #3e9b4f;
   --grass-11: #2a7e3b;
   --grass-12: #203c25;
+
+  /* UI semantic tokens */
+  --ui-bg-panel: #ffffff;
+  --ui-bg-subtle: var(--sand-2);
+  --ui-bg-hover: var(--sand-3);
+  --ui-border: var(--sand-5);
+  --ui-border-strong: var(--sand-6);
+  --ui-text: var(--sand-12);
+  --ui-text-soft: var(--sand-11);
+  --ui-text-muted: var(--sand-9);
+  --ui-heading: var(--bronze-12);
+
+  /* radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
 }
 
 /* Sand - Dark */
@@ -149,6 +165,22 @@
   --grass-10: #53b365;
   --grass-11: #71d083;
   --grass-12: #c2f0c2;
+
+  /* UI semantic tokens */
+  --ui-bg-panel: var(--sand-2);
+  --ui-bg-subtle: var(--sand-3);
+  --ui-bg-hover: var(--sand-4);
+  --ui-border: var(--sand-5);
+  --ui-border-strong: var(--sand-6);
+  --ui-text: var(--sand-12);
+  --ui-text-soft: var(--sand-11);
+  --ui-text-muted: var(--sand-9);
+  --ui-heading: var(--sand-12);
+
+  /* radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
 }
 
 /* ===== Tailwind v4 custom utilities via @theme ===== */
@@ -295,6 +327,25 @@ body {
   box-shadow: 0 0 0 1px var(--sand-6);
 }
 
+/* Reusable icon-link style */
+.icon-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  color: var(--ui-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+.icon-link:hover {
+  color: var(--ui-text);
+  background-color: var(--ui-bg-hover);
+}
+
 /* ===== Prose overflow containment ===== */
 .prose {
   overflow-wrap: break-word;
@@ -417,7 +468,7 @@ body {
 
 .prose figcaption {
   text-align: center;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: var(--sand-9);
   margin-top: 0.5rem;
   font-style: italic;

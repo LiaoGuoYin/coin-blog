@@ -24,8 +24,7 @@ const externalLinks = siteConfig.navLinks.filter((l) => l.external);
     <!-- Menu button -->
     <button
     id="mobile-menu-btn"
-    class="rounded-lg p-2 transition-colors"
-    style="color: var(--sand-11);"
+    class="icon-link"
     aria-label="Toggle navigation"
     aria-expanded="false"
   >
@@ -62,7 +61,7 @@ const externalLinks = siteConfig.navLinks.filter((l) => l.external);
           href={link.href}
           target="_blank"
           rel="noopener noreferrer"
-          class="mobile-icon-link"
+          class="icon-link"
           aria-label={link.label}
           title={link.label}
         >
@@ -95,18 +94,3 @@ const externalLinks = siteConfig.navLinks.filter((l) => l.external);
   });
 </script>
 
-<style>
-  .mobile-icon-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px;
-    border-radius: 8px;
-    color: var(--sand-9);
-    transition: color 0.15s, background-color 0.15s;
-  }
-  .mobile-icon-link:hover {
-    color: var(--sand-12);
-    background-color: var(--sand-3);
-  }
-</style>
