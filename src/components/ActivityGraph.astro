@@ -106,7 +106,7 @@ const allPostDates = Array.from(postDates);
 
   .activity-cell {
     aspect-ratio: 1;
-    border-radius: 2px;
+    border-radius: 3px;
     background-color: var(--sand-4);
     transition: background-color 0.3s;
     cursor: default;
@@ -155,7 +155,7 @@ const allPostDates = Array.from(postDates);
   .activity-tooltip {
     position: absolute;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     background-color: var(--sand-12);
     color: var(--sand-1);
     font-size: 11px;
@@ -177,8 +177,9 @@ const allPostDates = Array.from(postDates);
     position: fixed;
     inset: 0;
     z-index: 100;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     justify-content: center;
     align-items: center;
     padding: 2rem;
@@ -190,15 +191,15 @@ const allPostDates = Array.from(postDates);
 
   .activity-modal {
     background-color: var(--sand-1);
-    border: 1px solid var(--sand-4);
-    border-radius: 1rem;
+    border: none;
+    border-radius: var(--radius-lg);
     width: fit-content;
     max-width: calc(100vw - 4rem);
     max-height: 90vh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0,0,0,0.04);
   }
 
   .activity-modal-header {
@@ -206,7 +207,7 @@ const allPostDates = Array.from(postDates);
     align-items: center;
     justify-content: space-between;
     padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid var(--sand-4);
+    border-bottom: 1px solid var(--sand-3);
   }
 
   .activity-modal-header h2 {
@@ -222,7 +223,7 @@ const allPostDates = Array.from(postDates);
     border: none;
     cursor: pointer;
     padding: 4px;
-    border-radius: 6px;
+    border-radius: 50%;
     line-height: 0;
     transition: color 0.15s, background-color 0.15s;
   }
@@ -293,7 +294,7 @@ const allPostDates = Array.from(postDates);
   .activity-legend-cell {
     width: 11px;
     height: 11px;
-    border-radius: 2px;
+    border-radius: 3px;
   }
 </style>
 
