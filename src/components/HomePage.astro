@@ -4,6 +4,7 @@ import { getAllPosts, formatDate, estimateReadingTime } from '../lib/posts';
 import { siteConfig } from '../lib/config';
 
 const allPosts = getAllPosts();
+const pageSize = siteConfig.postsPerPage;
 ---
 
 <Layout title={siteConfig.title}>
@@ -35,8 +36,8 @@ const allPosts = getAllPosts();
       </div>
 
       <ul id="post-list" class="post-list post-list--list">
-        {allPosts.map((post) => (
-          <li>
+        {allPosts.map((post, i) => (
+          <li style={i >= pageSize ? 'display:none' : undefined}>
             <a href={`/${post.slug}`} class="post-item">
               <span class="post-title">{post.title}</span>
               <span class="post-meta">
@@ -720,10 +721,6 @@ const allPosts = getAllPosts();
       }
     }
 
-    // 初始隐藏超出首页的条目
-    allItems.forEach((item, i) => {
-      if (i >= pageSize) item.style.display = 'none';
-    });
     shown = Math.min(pageSize, total);
 
     if (total > pageSize) {
