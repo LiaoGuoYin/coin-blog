@@ -513,6 +513,49 @@ const allPosts = getAllPosts();
     margin: 0.5rem 0;
   }
 
+  .tl-images {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .tl-images img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    cursor: zoom-in;
+  }
+
+  /* Lightbox overlay */
+  .lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    cursor: zoom-out;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .lightbox-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .lightbox-overlay img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 0.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+
   .tl-body ul.contains-task-list {
     list-style: none;
     padding-left: 0;
@@ -588,6 +631,15 @@ const allPosts = getAllPosts();
     return md;
   }
 
+  interface MemoAttachment {
+    name: string;
+    filename: string;
+    externalLink: string;
+    type: string;
+    size: string;
+    memo: string;
+  }
+
   interface Memo {
     name: string;
     content: string;
@@ -595,6 +647,7 @@ const allPosts = getAllPosts();
     tags: string[];
     pinned: boolean;
     snippet: string;
+    attachments: MemoAttachment[];
   }
 
   function formatDate(iso: string): string {
@@ -606,6 +659,18 @@ const allPosts = getAllPosts();
   function getMemoId(memo: Memo): string {
     // memo.name is like "memos/123"
     return memo.name.replace('/', '-');
+  }
+
+  function renderAttachments(memo: Memo): string {
+    const images = (memo.attachments || []).filter((a) => a.type.startsWith('image/'));
+    if (images.length === 0) return '';
+
+    const imgs = images.map((a) => {
+      const src = a.externalLink || `${apiUrl}/file/${a.name}/${a.filename}`;
+      return `<img src="${src}" alt="${a.filename}" loading="lazy" />`;
+    });
+
+    return `<div class="tl-images">${imgs.join('')}</div>`;
   }
 
   function renderMemoItem(renderer: MarkdownIt, memo: Memo): string {
@@ -621,7 +686,7 @@ const allPosts = getAllPosts();
         <div class="tl-content">
           <span class="tl-date">${formatDate(memo.displayTime)}</span>
           ${tagsHtml}
-          <div class="tl-body">${html}</div>
+          <div class="tl-body">${html}${renderAttachments(memo)}</div>
         </div>
       </div>`;
   }
@@ -862,4 +927,34 @@ const allPosts = getAllPosts();
   }
 
   handlePath();
+
+  // --- Lightbox for memo images ---
+  {
+    const overlay = document.createElement('div');
+    overlay.className = 'lightbox-overlay';
+    document.body.appendChild(overlay);
+
+    function closeLightbox() {
+      overlay.classList.remove('active');
+      setTimeout(() => { overlay.innerHTML = ''; }, 200);
+    }
+
+    overlay.addEventListener('click', closeLightbox);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLightbox();
+    });
+
+    document.getElementById('memo-list')!.addEventListener('click', (e) => {
+      const img = (e.target as HTMLElement).closest<HTMLImageElement>('.tl-images img');
+      if (!img) return;
+      e.stopPropagation();
+      const preview = document.createElement('img');
+      preview.src = img.src;
+      preview.alt = img.alt;
+      overlay.innerHTML = '';
+      overlay.appendChild(preview);
+      requestAnimationFrame(() => overlay.classList.add('active'));
+    });
+  }
 </script>
