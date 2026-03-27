@@ -260,29 +260,58 @@
   box-sizing: border-box;
 }
 
-/* Size-adjusted fallback fonts to prevent layout shift during web font loading */
+/* ===== Self-hosted fonts (latin subset) ===== */
 @font-face {
-  font-family: "Poppins Fallback";
-  src: local("Arial");
-  size-adjust: 110%;
-  ascent-override: 105%;
-  descent-override: 35%;
-  line-gap-override: 10%;
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src: url("/fonts/poppins-400-latin.woff2") format("woff2");
 }
 
 @font-face {
-  font-family: "Lora Fallback";
-  src: local("Georgia");
-  size-adjust: 97%;
-  ascent-override: 100%;
-  descent-override: 30%;
-  line-gap-override: 0%;
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 500;
+  font-display: optional;
+  src: url("/fonts/poppins-500-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 600;
+  font-display: optional;
+  src: url("/fonts/poppins-600-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lora";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: optional;
+  src: url("/fonts/lora-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lora";
+  font-style: italic;
+  font-weight: 400;
+  font-display: optional;
+  src: url("/fonts/lora-italic-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: optional;
+  src: url("/fonts/jetbrains-mono-latin.woff2") format("woff2");
 }
 
 html {
   font-family:
     "Poppins",
-    "Poppins Fallback",
     system-ui,
     -apple-system,
     sans-serif;
@@ -375,7 +404,7 @@ body {
 
 /* ===== Prose font overrides (Claude-style: serif body + mono code) ===== */
 .prose {
-  font-family: "Lora", "Lora Fallback", Georgia, "Times New Roman", serif;
+  font-family: "Lora", Georgia, "Times New Roman", serif;
   font-size: 0.9375rem;
   line-height: 1.8;
   font-weight: 500;
