@@ -400,6 +400,8 @@ body {
 .prose img {
   max-width: 100%;
   height: auto;
+  max-height: 70vh;
+  object-fit: contain;
 }
 
 /* ===== Prose font overrides (Claude-style: serif body + mono code) ===== */
@@ -408,6 +410,8 @@ body {
   font-size: 0.9375rem;
   line-height: 1.8;
   font-weight: 500;
+  text-align: justify;
+  text-autospace: ideograph-alpha ideograph-numeric;
 }
 
 @media (min-width: 640px) {
@@ -489,7 +493,7 @@ body {
   padding: 1rem 1.25rem;
   margin-left: 0;
   margin-right: 0;
-  font-style: italic;
+  font-style: normal;
   color: var(--sand-11);
 }
 
