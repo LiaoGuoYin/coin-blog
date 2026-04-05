@@ -25,3 +25,6 @@ pnpm-debug.log*
 .vscode/
 .wrangler/
 draft/
+
+# Localflare generated files
+.localflare/
