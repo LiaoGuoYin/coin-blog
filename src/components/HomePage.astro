@@ -641,6 +641,7 @@ const pageSize = siteConfig.postsPerPage;
   interface Memo {
     name: string;
     content: string;
+    createTime: string;
     displayTime: string;
     tags: string[];
     pinned: boolean;
@@ -899,10 +900,10 @@ const pageSize = siteConfig.postsPerPage;
     const data = await res.json();
     const memos: Memo[] = data.memos || [];
 
-    // Pinned first, then newest (API 可能已排序，但保险起见本地再排一次)
+    // Pinned first, then newest by createTime
     memos.sort((a, b) => {
       if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
-      return b.displayTime.localeCompare(a.displayTime);
+      return b.createTime.localeCompare(a.createTime);
     });
 
     return { memos, pageToken: data.nextPageToken || '' };
