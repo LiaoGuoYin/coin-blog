@@ -10,8 +10,8 @@ interface Props {
 
 const { currentPath = '/' } = Astro.props;
 
-const internalLinks = siteConfig.navLinks.filter((l) => !l.external);
-const externalLinks = siteConfig.navLinks.filter((l) => l.external);
+const mainLinks = siteConfig.navLinks.filter((l) => !l.iconOnly);
+const iconLinks = siteConfig.navLinks.filter((l) => l.iconOnly);
 
 function isActive(href: string): boolean {
   if (href === '/post') {
@@ -40,7 +40,7 @@ function isActive(href: string): boolean {
 
   <!-- Navigation -->
   <nav class="flex flex-col gap-1 flex-1">
-    {internalLinks.map((link) => {
+    {mainLinks.map((link) => {
       const tabName = link.href === '/post' ? 'posts' : link.href === '/memo' ? 'memos' : undefined;
       const active = isActive(link.href);
 
@@ -48,6 +48,8 @@ function isActive(href: string): boolean {
         <a
           href={link.href}
           data-tab={tabName}
+          target={link.external ? '_blank' : undefined}
+          rel={link.external ? 'noopener noreferrer' : undefined}
           class={[
             'flex items-center gap-2 rounded-[var(--radius-md)] py-2 px-4 text-sm font-medium transition-colors duration-100',
             active
@@ -73,7 +75,7 @@ function isActive(href: string): boolean {
 
     <!-- External icon links -->
     <div class="flex items-center gap-1">
-      {externalLinks.map((link) => (
+      {iconLinks.map((link) => (
         <a
           href={link.href}
           target="_blank"

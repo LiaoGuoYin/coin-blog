@@ -17,15 +17,20 @@ export const siteConfig = {
   /** 头像路径（放在 public 目录下） */
   avatar: "/avatar.png",
 
-  /** 导航链接 */
+  /** 导航链接
+   * external: 新标签打开
+   * iconOnly: 仅底部小图标栏展示，不在主导航区渲染
+   */
   navLinks: [
     { href: "/post", label: "Post" },
     { href: "/memo", label: "Memo" },
-    { href: "/atom.xml", label: "RSS", external: true },
+    { href: "https://aiusage.liaoguoyin.com", label: "AIUsage", external: true },
+    { href: "/atom.xml", label: "RSS", external: true, iconOnly: true },
     {
       href: "https://github.com/LiaoGuoYin/coin-blog",
       label: "GitHub",
       external: true,
+      iconOnly: true,
     },
   ],
 

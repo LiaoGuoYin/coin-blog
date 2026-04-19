@@ -3,8 +3,8 @@ import { siteConfig } from '../lib/config';
 import { navIcons } from '../lib/nav-icons';
 import ThemeToggle from './ThemeToggle.astro';
 
-const internalLinks = siteConfig.navLinks.filter((l) => !l.external);
-const externalLinks = siteConfig.navLinks.filter((l) => l.external);
+const mainLinks = siteConfig.navLinks.filter((l) => !l.iconOnly);
+const iconLinks = siteConfig.navLinks.filter((l) => l.iconOnly);
 ---
 
 <div class="flex items-center px-4 pt-3 pb-2 justify-between lg:hidden">
@@ -44,19 +44,21 @@ const externalLinks = siteConfig.navLinks.filter((l) => l.external);
   class="hidden lg:hidden px-4 pb-3"
 >
   <nav class="flex flex-col gap-1">
-    {internalLinks.map((link) => {
+    {mainLinks.map((link) => {
       const tabName = link.href === '/post' ? 'posts' : link.href === '/memo' ? 'memos' : undefined;
       return (
         <a
           href={link.href}
           data-tab={tabName}
+          target={link.external ? '_blank' : undefined}
+          rel={link.external ? 'noopener noreferrer' : undefined}
           class="flex items-center gap-2 rounded-[var(--radius-md)] py-2 px-4 text-sm font-medium transition-colors hover:bg-sand-3"
           style="color: var(--sand-11);"
         ><Fragment set:html={navIcons[link.label] || ''} />{link.label}</a>
       );
     })}
     <div class="flex items-center gap-1 px-3 pt-1">
-      {externalLinks.map((link) => (
+      {iconLinks.map((link) => (
         <a
           href={link.href}
           target="_blank"
