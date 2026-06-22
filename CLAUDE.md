@@ -10,7 +10,7 @@ pnpm build      # Build static site to dist/
 pnpm preview    # Preview built output
 pnpm deploy     # Build + deploy to Cloudflare Pages
 
-bash scripts/check-drafts.sh  # 将 posts/ 下 published 非 true 的文章移入 posts/draft/
+bash scripts/check-drafts.sh  # 将 posts/ 下 published 非 true 的文章包移入 posts/draft/
 ```
 
 Requires Node.js >= 22.12.0 and pnpm.
@@ -19,11 +19,11 @@ Requires Node.js >= 22.12.0 and pnpm.
 
 Astro 6 static blog deployed to Cloudflare Pages. Pure static output — no server runtime.
 
-**Content flow:** Markdown files in `posts/` → parsed by gray-matter (frontmatter) + markdown-it (body) → static HTML pages via Astro SSG. Memos are fetched client-side from an external Memos API.
+**Content flow:** Post packages in `posts/{slug}/index.md` with optional `assets/` → parsed by gray-matter (frontmatter) + markdown-it (body) → static HTML pages via Astro SSG. Post-local assets are emitted through `/post-assets/{slug}/...`. Memos are fetched client-side from an external Memos API.
 
 **Routing:**
 - `/` and `/post` → homepage with post list (tab-switchable to Memos)
-- `/:slug` → article page (generated from `posts/*.md` filenames)
+- `/:slug` → article page (generated from `posts/{slug}/index.md` folder names)
 - `/memo` → memos timeline
 - `/atom.xml` → RSS feed
 
@@ -47,6 +47,8 @@ date: string        # ISO 8601 or YYYY-MM-DD
 published: boolean  # Must be true to appear on site
 feature: string     # Reserved, currently unused
 ```
+
+Post-local images and attachments live in `posts/{slug}/assets/` and should be referenced from Markdown with relative paths such as `./assets/example.webp`.
 
 Content locale is Chinese — UI text, date formatting, and reading time calculation (300 chars/min for Chinese, 200 words/min for English) are Chinese-optimized.
 

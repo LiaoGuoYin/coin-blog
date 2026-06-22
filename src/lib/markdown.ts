@@ -1,5 +1,7 @@
+import path from 'node:path';
 import MarkdownIt from 'markdown-it';
 import type StateCore from 'markdown-it/lib/rules_core/state_core.mjs';
+import type Token from 'markdown-it/lib/token.mjs';
 import anchor from 'markdown-it-anchor';
 import { fromHighlighter } from '@shikijs/markdown-it';
 import { createHighlighter } from 'shiki';
@@ -19,6 +21,10 @@ export interface Heading {
   id: string;
 }
 
+export interface RenderMarkdownOptions {
+  slug?: string;
+}
+
 // Must match markdown-it-anchor's default slugify
 const slugify = (s: string) =>
   encodeURIComponent(s.trim().toLowerCase().replace(/\s+/g, '-'));
@@ -32,6 +38,41 @@ function extractHeadings(markdown: string): Heading[] {
     headings.push({ level: m[1].length, text, id: slugify(text) });
   }
   return headings;
+}
+
+function isRelativePostAssetUrl(url: string): boolean {
+  return !/^(?:[a-z][a-z0-9+.-]*:|\/\/|\/|#)/i.test(url);
+}
+
+function resolvePostAssetUrl(url: string, slug?: string): string {
+  if (!slug || !isRelativePostAssetUrl(url)) return url;
+
+  const match = url.match(/^([^?#]*)([?#].*)?$/);
+  const pathname = match?.[1] || '';
+  const suffix = match?.[2] || '';
+  const normalized = path.posix.normalize(pathname.replace(/\\/g, '/')).replace(/^\.\//, '');
+
+  if (
+    !normalized ||
+    normalized === '.' ||
+    normalized === '..' ||
+    normalized.startsWith('../') ||
+    (normalized !== 'assets' && !normalized.startsWith('assets/'))
+  ) return url;
+
+  const encoded = normalized
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/');
+
+  return `/post-assets/${encodeURIComponent(slug)}/${encoded}${suffix}`;
+}
+
+function walkTokens(tokens: Token[], visit: (token: Token) => void): void {
+  for (const token of tokens) {
+    visit(token);
+    if (token.children) walkTokens(token.children, visit);
+  }
 }
 
 let _md: MarkdownIt | null = null;
@@ -53,9 +94,28 @@ async function getMd(): Promise<MarkdownIt> {
 
     _md.use(githubAlerts);
 
+    _md.use((md: MarkdownIt) => {
+      md.core.ruler.after('inline', 'resolve_relative_post_assets', (state: StateCore) => {
+        const slug = typeof state.env?.postSlug === 'string' ? state.env.postSlug : undefined;
+        if (!slug) return;
+
+        walkTokens(state.tokens, (token) => {
+          if (token.type === 'image') {
+            const src = token.attrGet('src');
+            if (src) token.attrSet('src', resolvePostAssetUrl(src, slug));
+          }
+
+          if (token.type === 'link_open') {
+            const href = token.attrGet('href');
+            if (href) token.attrSet('href', resolvePostAssetUrl(href, slug));
+          }
+        });
+      });
+    });
+
     // Convert ![alt](src) images to <figure><img><figcaption> when alt is present
     _md.use((md: MarkdownIt) => {
-      md.core.ruler.after('inline', 'image_to_figure', (state: StateCore) => {
+      md.core.ruler.after('resolve_relative_post_assets', 'image_to_figure', (state: StateCore) => {
         for (let i = 0; i < state.tokens.length; i++) {
           const token = state.tokens[i];
           if (token.type !== 'paragraph_open') continue;
@@ -69,7 +129,7 @@ async function getMd(): Promise<MarkdownIt> {
           const src = imgToken.attrGet('src') || '';
           if (!alt) continue;
           // Replace paragraph_open + inline + paragraph_close with raw HTML
-          const figureHtml = `<figure><img src="${src}" alt="${alt}" loading="lazy"><figcaption>${alt}</figcaption></figure>`;
+          const figureHtml = `<figure><img src="${md.utils.escapeHtml(src)}" alt="${md.utils.escapeHtml(alt)}" loading="lazy"><figcaption>${md.utils.escapeHtml(alt)}</figcaption></figure>`;
           const htmlToken = new state.Token('html_block', '', 0);
           htmlToken.content = figureHtml + '\n';
           state.tokens.splice(i, 3, htmlToken);
@@ -93,10 +153,10 @@ async function getMd(): Promise<MarkdownIt> {
   return _md;
 }
 
-export async function renderMarkdown(content: string): Promise<{ html: string; headings: Heading[] }> {
+export async function renderMarkdown(content: string, options: RenderMarkdownOptions = {}): Promise<{ html: string; headings: Heading[] }> {
   const md = await getMd();
   return {
-    html: md.render(content),
+    html: md.render(content, { postSlug: options.slug }),
     headings: extractHeadings(content),
   };
 }

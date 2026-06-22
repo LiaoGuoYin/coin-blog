@@ -41,7 +41,10 @@
 
 ```
 coin-blog/
-├── posts/                          # Markdown 博客文章 (每篇一个 .md 文件)
+├── posts/                          # Markdown 博客文章包
+│   └── {slug}/
+│       ├── index.md                # 文章正文
+│       └── assets/                 # 当前文章私有图片与附件
 ├── public/
 │   ├── avatar.png               # 站点头像 (也用作 favicon)
 │   ├── favicon.png
@@ -182,7 +185,17 @@ export default defineConfig({
 
 ### 6.1 博客文章 (Post)
 
-**存储位置**：`posts/*.md`
+**存储位置**：`posts/{slug}/index.md`
+
+**文章包结构**：
+
+```text
+posts/
+└── hello-world/
+    ├── index.md
+    └── assets/
+        └── cover.webp
+```
 
 **Frontmatter 格式**：
 
@@ -203,22 +216,25 @@ feature: ''                           # 预留字段，当前未使用
 interface PostMeta {
   title: string;
   date: string;
-  slug: string;   // 取自文件名（去掉 .md），或 frontmatter 中的 slug 字段
+  slug: string;   // 取自 posts/{slug}/ 文件夹名
 }
 
 interface Post extends PostMeta {
-  content: string; // 原始 Markdown 文本
+  content: string;    // 原始 Markdown 文本
+  sourcePath: string; // index.md 绝对路径
+  assetsDir: string;  // assets/ 绝对路径
   type: 'post';
 }
 ```
 
 **读取逻辑** (`src/lib/posts.ts`)：
 
-1. 读取 `posts/` 下所有 `.md` 文件
+1. 读取 `posts/` 下所有 `*/index.md` 文章包
 2. 用 `gray-matter` 解析 frontmatter
 3. 过滤 `published !== true` 的文章
 4. 按 `date` 降序排列（最新在前）
-5. slug 取自 `frontmatter.slug`，若无则取文件名去掉 `.md`
+5. slug 取自文章文件夹名
+6. `./assets/...` 相对资源在渲染时映射为 `/post-assets/{slug}/assets/...`
 
 ### 6.2 Memo (来自外部 API)
 

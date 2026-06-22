@@ -58,7 +58,17 @@ pnpm dev
 
 ### 6. 写文章
 
-在 `posts/` 目录下新建 `.md` 文件：
+在 `posts/` 目录下新建文章文件夹，每篇文章是一个独立包：
+
+```text
+posts/
+└── hello-world/
+    ├── index.md
+    └── assets/
+        └── cover.webp
+```
+
+`index.md` 示例：
 
 ```markdown
 ---
@@ -67,12 +77,15 @@ date: '2025-01-01'
 published: true
 ---
 
+![封面](./assets/cover.webp)
+
 正文内容...
 ```
 
 - `published: true` 必须设为 `true` 文章才会显示
-- 文件名就是 URL 路径，比如 `hello-world.md` 对应 `/hello-world`
-- 运行 `bash scripts/check-drafts.sh` 可将未发布的文章自动移入 `posts/draft/`
+- 文件夹名就是 URL 路径，比如 `posts/hello-world/index.md` 对应 `/hello-world`
+- 文章私有图片和附件放在当前文章的 `assets/` 目录，用 `./assets/...` 相对路径引用
+- 运行 `bash scripts/check-drafts.sh` 可将未发布的文章包自动移入 `posts/draft/`
 
 ### 7. 部署到 Cloudflare Pages
 

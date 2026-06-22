@@ -27,7 +27,7 @@ interface Props {
 }
 
 const { post, prev, next } = Astro.props;
-const { html: contentHtml, headings } = await renderMarkdown(post.content);
+const { html: contentHtml, headings } = await renderMarkdown(post.content, { slug: post.slug });
 const pageTitle = `${post.title} — ${siteConfig.title}`;
 const readingTime = estimateReadingTime(post.content);
 ---

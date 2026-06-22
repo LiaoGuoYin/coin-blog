@@ -58,7 +58,17 @@ Open http://localhost:4321 in your browser.
 
 ### 6. Write Posts
 
-Create a `.md` file in `posts/`:
+Create a post package in `posts/`:
+
+```text
+posts/
+└── hello-world/
+    ├── index.md
+    └── assets/
+        └── cover.webp
+```
+
+`index.md` example:
 
 ```markdown
 ---
@@ -67,12 +77,15 @@ date: '2025-01-01'
 published: true
 ---
 
+![Cover](./assets/cover.webp)
+
 Your content here...
 ```
 
 - `published: true` is required for the post to appear
-- The filename becomes the URL path, e.g. `hello-world.md` → `/hello-world`
-- Run `bash scripts/check-drafts.sh` to move unpublished posts to `posts/draft/`
+- The folder name becomes the URL path, e.g. `posts/hello-world/index.md` → `/hello-world`
+- Keep post-local images and attachments in `assets/`, referenced as `./assets/...`
+- Run `bash scripts/check-drafts.sh` to move unpublished post packages to `posts/draft/`
 
 ### 7. Deploy to Cloudflare Pages
 
