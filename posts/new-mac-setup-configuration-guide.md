@@ -63,14 +63,11 @@ Mac 自带的 Terminal 终端很好用，但缺点是比较简陋，文本既没
 ![1](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_5.png)
 
 ```bash
-export CLICOLOR='Yes' # 是否输出颜色
-export LSCOlORS='Exfxcxdxbxegedabagacad' # 定义 ls 命令输出的颜色和样式
-export LC_ALL=en_US.UTF-8 # 设置所有区域设置为美国英语，字符编码为 UTF-8
-export LANG=en_US.UTF-8 # 设置默认语言为美国英语，字符编码为 UTF-8
-export PS1="%B%F{034}%m%f%b:%d %% " # 设置命令提示符格式，包含主机名和当前目录
-
-export LC_ALL=en_US.UTF-8 # 重复设置所有区域设置
-export LANG=en_US.UTF-8 # 重复设置默认语言
+export LC_ALL=en_US.UTF-8                  # 全局区域设置：美式英语 + UTF-8
+export LANG=en_US.UTF-8
+export CLICOLOR=1                          # 让 ls 等命令输出颜色
+export LSCOLORS='Exfxcxdxbxegedabagacad'   # ls 配色方案
+export PS1="%B%F{034}%m%f%b:%~ %F{green}%%%f " # 主机名 + 当前目录 + 彩色提示符
 
 ```
 
@@ -82,12 +79,29 @@ export LANG=en_US.UTF-8 # 重复设置默认语言
 
 ### 远程连接
 
-为了能随时方便地把本机当作服务器，通过 CLI 或者 VNC 形式进行连接，可以配置远程登录配置项实现 Ubuntu 下 openssh-server 的效果。
+为了能随时把这台 Mac 当作一台小服务器用，系统里把远程登录、屏幕共享和文件共享打开即可。
 
-> * Mac Mini：[https://www.youtube.com/watch?v=CITHNloGlnU](https://www.youtube.com/watch?v=CITHNloGlnU)
->
-> * 文件共享：[https://sspai.com/post/61388](https://sspai.com/post/61388)
->
+配置位置：系统设置 > 通用 > 共享。
+
+* 电脑名称：改成容易识别的名字，比如 `macmini`。点右侧「编辑」，确认本地主机名，局域网里可以用 `macmini.local` 访问。
+
+* 远程登录：打开后选择允许访问的用户，建议只给自己的管理员账号或单独的维护账号。之后可以通过 `ssh 用户名@macmini.local` 或 `ssh 用户名@IP` 进入命令行。
+
+* 屏幕共享：打开后同样限制可访问用户。需要从 Jump Desktop、Finder 或其他 VNC 客户端连接时，记下系统给出的 `vnc://` 地址；如果要给标准 VNC 客户端用，在信息按钮里设置 VNC 密码。
+
+* 文件共享：打开后在「共享文件夹」里只加需要远程访问的目录，再给账号配置读写权限。需要 SMB 访问时，进入「选项」打开 SMB，并勾选允许登录的账号，连接地址是 `smb://macmini.local` 或 `smb://IP`。
+
+* 防火墙：如果开启了防火墙，在「网络 > 防火墙 > 选项」里允许远程登录、屏幕共享和文件共享。
+
+如果是 MacBook Pro 当 server 用，还要单独处理屏幕和盒盖。比较稳的方式是接电后让屏幕自己熄灭，但机器不进入睡眠：
+
+```bash
+sudo pmset -c sleep 0 displaysleep 480 disksleep 0 ttyskeepawake 1 womp 1
+pmset -g custom
+
+```
+
+上面只改接电状态，电池状态仍然保留系统默认策略。`sleep 0` 是接电不自动休眠，`displaysleep 10` 是 480 分钟后关闭屏幕，`ttyskeepawake 1` 可以避免 SSH 会话还在时系统进入空闲睡眠，`womp 1` 用来打开有线网络唤醒。
 
 ### 禁用 .DS_Store
 
@@ -108,13 +122,38 @@ defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool TRUE
 
 配置好科学上网后，后续软件的安装难度呈指数级下降。
 
-配置为软路由，DHCP 接管网络，可参考（TODO）：
+如果要把 Mac 配成家里的软路由，核心思路是让 Mac 跑 Surge 网关模式，再让局域网设备把网关和 DNS 指向这台 Mac。这里有两种做法，手动指定网关适合少量设备，Surge DHCP 适合统一下发网络配置，不要混着配。
 
-* [https://dosbat.com/2024/10/08/Macmini+surge+asus%20mesh%E7%BB%84%E7%BD%91/index.html](https://dosbat.com/2024/10/08/Macmini+surge+asus%20mesh%E7%BB%84%E7%BD%91/index.html)
+共同前置：
 
-* [https://oftime.net/2021/07/27/net/](https://oftime.net/2021/07/27/net/)
+* Mac 接有线网口，不建议用 Wi-Fi 做网关。给 Mac 固定一个局域网 IP，比如 `192.168.50.2`。
 
-* [https://qust.me/post/MacSurgeRouter/](https://qust.me/post/MacSurgeRouter/)
+* 在 Surge 里导入可用配置，确认 DNS 有上游服务器，然后打开「增强模式」或「VM 网关」。Surge Mac 6 以后可以优先用 VM 网关，普通场景用增强模式也够。
+
+方案一：手动指定设备网关。
+
+这种方式不动路由器 DHCP，路由器继续负责拨号、Wi-Fi、交换和地址分配。只在需要走 Surge 的设备上手动改网络设置：网关填 Mac 的 IP，DNS 填 `198.18.0.2`。改完后让设备重新连接 Wi-Fi，确认它的网关已经指向 Mac。
+
+如果只想让手机、游戏机、电视这类少数设备走 Surge，优先用这个方案。回滚也简单，把设备上的网关和 DNS 改回自动获取即可。
+
+方案二：Surge DHCP 自动下发网关。
+
+这种方式由 Surge 给局域网设备下发网关和 DNS，适合全家设备都走这台 Mac。先在路由器里关闭原来的 DHCP，只保留 Surge 的 DHCP，然后到 Surge 的「设备」里打开 DHCP 服务器，选择有线网卡。
+
+Surge DHCP 负责下发网络配置，设备是否走 Surge 还要看网关模式里的设备开关。在 Surge 设备列表里右键目标设备，选择「使用 Surge 作为网关」。如果想默认接管所有新设备，再打开默认使用 Surge 作为网关。配好后让手机、电脑重新连接 Wi-Fi，确认它们拿到的网关是 Mac 的 IP。
+
+这个软路由方案需要留一条回滚路径：如果网络断了，先关闭 Surge 的 DHCP，再回路由器里打开 DHCP，就能恢复普通路由器上网。
+（TODO：Fallback 到 F50 Pro 做热备）
+
+参考：
+
+* [Surge Mac 网关模式配置指南](https://kb.nssurge.com/surge-knowledge-base/zh/guidelines/gateway)
+
+* [Macmini Surge做网关软路由，mesh组网全家科学上网翻墙](https://dosbat.com/2024/10/08/Macmini+surge+asus%20mesh%E7%BB%84%E7%BD%91/index.html)
+
+* [一次网络建设踩坑记](https://oftime.net/2021/07/27/net/)
+
+* [Surge 把你的Mac 变成最强路由器](https://blog.qust.me/MacSurgeRouter)
 
 ### Homebrew
 
@@ -134,51 +173,53 @@ xcode-select --install
 
 ```
 
-### NVM
+### Node.js
 
 ![Xnip2024-11-21_23-38-56](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_7.png)
 
-[NVM](https://github.com/nvm-sh/nvm)（Node Version Manager）是 Node.js 版本管理工具，可以方便地安装卸载不同版本的 Node.js。
+以前这里会先装 [NVM](https://github.com/nvm-sh/nvm)，再用 `npm install -g` 安装一批全局 CLI。现在这条链路可以收掉，Claude Code 和 Codex 不再靠全局 npm 包安装，按各自的安装方式恢复即可。
 
-* 安装 NVM
+Node.js 只在项目需要时再装。需要多版本 Node 的项目，继续用 nvm；只跑普通前端项目时，优先跟着项目里的 `.nvmrc`、`packageManager`、`corepack` 走，不把全局工具绑到某个 Node 版本上。
+
+最小安装和使用：
 
 ```bash
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-
-```
-
-* 安装 Node.js 20，并启用
-
-```bash
-nvm install 20
-nvm use 20
-
-node --version # 验证 Node.js 版本
-npm install -g yarn # 全局安装 Yarn 包管理器
+nvm install --lts
+nvm use --lts
+node --version
 
 ```
 
 ### Claude Code
 
-* 安装
+Claude Code，人生导师克老师，必装，没什么好说的，尤其应该先装，装完之后把这个文章丢给他就能给哥们配电脑了。
 
-```markup
-npm install -g @anthropic-ai/claude-code
+直接通过 Homebrew 安装即可：`brew install --cask claude claude-code`
+
+```bash
+claude --version
 ```
 
-* 备份恢复 ~/.claude 可以查看历史用量，对话历史记录，token 等
+新机器恢复时重点保留 `~/.claude`，这里面有登录状态、使用记录和历史对话。恢复完后先跑一次 `claude --version`，再在一个测试仓库里启动 Claude Code，确认能正常读取项目和执行命令。
 
 ### Codex CLI
 
-* 安装
+Codex 也是必装，接入 sub2api，之前是作为 fallback 备用，现在越来越顺手了，有超越克老师的潜质。
 
-```markup
-npm install -g @openai/codex
+也是直接通过 Homebrew 安装即可：`brew install --cask codex codex-app`
+
+```bash
+codex --version
 ```
 
-* 备份 ~/.codex：
+新机器恢复时重点备份 `~/.codex`：
 
-  * 仅备份 ~/.codex/auth.json 即可无登录切换，[事实上官方也推荐这么做](https://github.com/openai/codex/blob/main/docs/authentication.md)
+* `~/.codex/auth.json`：登录状态，恢复后可以少走一次登录。
+
+* `~/.codex/config.toml`：本机偏好、模型和工具相关配置，如果有自定义就一起带上。
+
+> [事实上官方也推荐这么做](https://github.com/openai/codex/blob/main/docs/authentication.md)
 
 ## 应用软件
 
@@ -196,43 +237,53 @@ brew install curl
 brew install wget
 brew install tree
 brew install jq
+brew install gh
+brew install scrcpy
+brew install syncthing
+brew install tmux
+brew install uv
+brew install xcodegen
 
 # 安装常用应用程序
 echo "Installing applications..."
 # 下文会详细介绍的 app
 brew install --cask surge
 brew install --cask 1password
-brew install --cask baidunetdisk
 brew install --cask downie
 brew install --cask figma
-brew install --cask handbrake
+brew install --cask handbrake-app
 brew install --cask heynote
 brew install --cask orbstack
 brew install --cask raycast
-brew install --cask rustdesk
 brew install --cask spotify
 brew install --cask typora
 brew install --cask visual-studio-code
 brew install --cask adobe-creative-cloud
+brew install --cask jump-desktop
 
 # 其他常规软件
+brew install --cask 1password-cli
+brew install --cask android-platform-tools
 brew install --cask wechat
 brew install --cask google-chrome
 brew install --cask tencent-meeting
 brew install --cask appcleaner
 brew install --cask imageoptim
 brew install --cask charles
-brew install --cask postman
 brew install --cask microsoft-office
 brew install --cask telegram-desktop
 brew install --cask proxyman
 brew install --cask eudic
-brew install --cask royal-tsx
 brew install --cask iina
 brew install --cask ogdesign-eagle
-brew install --cask zerotier-one
-brew install --cask tailscale
-brew install --cask keka
+brew install --cask tailscale-app
+brew install --cask chatgpt
+brew install --cask claude
+brew install --cask codex
+brew install --cask codex-app
+brew install --cask cursor
+brew install --cask muxy
+brew install --cask termius
 
 ```
 
@@ -264,7 +315,7 @@ git config --global user.email "liaoguoyin#live.com"
 
 * 安装 code 命令行快速启动。运行 VS Code，打开命令面板（`command + shift + p`）输入 `Shell` 找到「Shell 命令: 在 PATH 中安装 code 命令」
 
-* 安装插件
+* 导入个人配置：[coin-vscode VS Code Profile](https://vscode.dev/profile/github/76fccdbe9500129e8fd731c7fc0f6413)。打开链接后导入 profile，会带上当前导出的 `settings`、`keybindings`、`snippets` 和 31 个插件清单，包括 Claude Code、Ruff、Prettier、markdownlint、GitLens、Python/Pylance、Remote SSH/Dev Containers、YAML、Live Server、vscode-icons 等。
 
 ### Typora
 
@@ -296,11 +347,11 @@ git config --global user.email "liaoguoyin#live.com"
 
 * 文本暂存。临时存放一些代码片段、待办事项
 
-### Windows App
+### Jump Desktop
 
 ![image-20250329141007877](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_13.png)
 
-* 远程桌面连接客户端，支持 RDP VNC 协议，微软为果子倾情打造
+* 远程桌面连接客户端，支持 RDP、VNC 等协议，用来连 Windows、Mac 或家里的其他远程机器。
 
 ### Adobe
 
@@ -315,21 +366,6 @@ git config --global user.email "liaoguoyin#live.com"
 ![image-20250329140437622](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_15.png)
 
 * 原型设计工具。轻量 P 图
-
-### TeamViewer
-
-![image-20250329143354474](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_16.png)
-
-* 远程协助。帮朋友修修电脑软件文件
-  * 可能会有被判断为商用然后被断开链接的问题，但通过远程组网不走 TeamViewer 服务器来解决
-  * 通过走组网连接，TeamViewer 体验非常好
-  * 已切换为 RustDesk + 自建中转节点
-
-### LocalSend
-
-![image-20250329140258702](https://cdn.liaoguoyin.com/images/new-mac-setup-configuration-guide_17.png)
-
-* 跨平台文件传输工具。可以在局域网中多个设备传文件：比如 Ubuntu 传 Mac，Android 传 iPhone
 
 ### Spotify
 
