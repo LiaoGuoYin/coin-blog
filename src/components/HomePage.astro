@@ -615,6 +615,7 @@ const pageSize = siteConfig.postsPerPage;
 <script>
   import MarkdownIt from 'markdown-it';
   import githubAlerts from 'markdown-it-github-alerts';
+  import { formatMemoDateTime } from '../lib/memo-time.mjs';
 
   // --- Markdown 渲染器（轻量版，不含语法高亮） ---
   let md: MarkdownIt | null = null;
@@ -642,17 +643,12 @@ const pageSize = siteConfig.postsPerPage;
     name: string;
     content: string;
     createTime: string;
-    displayTime: string;
+    updateTime?: string;
+    displayTime?: string | null;
     tags: string[];
     pinned: boolean;
     snippet: string;
     attachments: MemoAttachment[];
-  }
-
-  function formatDate(iso: string): string {
-    const d = new Date(iso);
-    const pad = (n: number) => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
   function getMemoId(memo: Memo): string {
@@ -675,15 +671,16 @@ const pageSize = siteConfig.postsPerPage;
   function renderMemoItem(renderer: MarkdownIt, memo: Memo): string {
     const html = renderer.render(memo.content);
     const id = getMemoId(memo);
-    const tagsHtml = memo.tags.length > 0
-      ? `<div class="tl-tags">${memo.tags.map((t) => `<span class="tl-tag">#${t}</span>`).join('')}</div>`
+    const tags = memo.tags || [];
+    const tagsHtml = tags.length > 0
+      ? `<div class="tl-tags">${tags.map((t) => `<span class="tl-tag">#${t}</span>`).join('')}</div>`
       : '';
 
     return `
       <div class="tl-item" id="${id}">
         <button class="tl-dot tl-anchor" data-id="${id}" title="复制链接" aria-label="复制此条 Memo 的链接"></button>
         <div class="tl-content">
-          <span class="tl-date">${formatDate(memo.displayTime)}</span>
+          <span class="tl-date">${formatMemoDateTime(memo)}</span>
           ${tagsHtml}
           <div class="tl-body">${html}${renderAttachments(memo)}</div>
         </div>

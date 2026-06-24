@@ -299,6 +299,8 @@ const allPostDates = Array.from(postDates);
 </style>
 
 <script>
+  import { getMemoDateKey } from '../lib/memo-time.mjs';
+
   const graph = document.querySelector<HTMLDivElement>('.activity-graph');
   if (graph) {
     const apiUrl = graph.dataset.api!;
@@ -383,8 +385,8 @@ const allPostDates = Array.from(postDates);
           if (!res.ok) break;
           const data = await res.json();
           for (const memo of data.memos || []) {
-            const match = memo.displayTime?.match(/^(\d{4}-\d{2}-\d{2})/);
-            if (match) dates.add(match[1]);
+            const dateKey = getMemoDateKey(memo);
+            if (dateKey) dates.add(dateKey);
           }
           pageToken = data.nextPageToken || '';
         } while (pageToken);
