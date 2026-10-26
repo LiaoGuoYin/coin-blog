@@ -1,69 +1,86 @@
 ---
 import { siteConfig } from '../lib/config';
-import { navIcons } from '../lib/nav-icons';
+import { navIcons, externalIcon } from '../lib/nav-icons';
+import { mainLinks, iconLinks, tabFor, isActive } from '../lib/nav';
 import ThemeToggle from './ThemeToggle.astro';
 
-const mainLinks = siteConfig.navLinks.filter((l) => !l.iconOnly);
-const iconLinks = siteConfig.navLinks.filter((l) => l.iconOnly);
+interface Props {
+  currentPath?: string;
+  /** Article pages put the Contents entry here instead of a floating button */
+  showToc?: boolean;
+}
+
+const { currentPath = '/', showToc = false } = Astro.props;
 ---
 
-<div class="flex items-center px-4 pt-3 pb-2 justify-between lg:hidden">
+<div class="flex items-center gap-3 h-14 px-4 lg:hidden">
   <!-- Logo -->
-  <a href="/" class="flex items-center gap-2">
+  <a href="/" class="flex items-center gap-3 flex-1 min-w-0" style="color: var(--text); text-decoration: none;">
     <img
       src={siteConfig.avatar}
       alt={siteConfig.title}
-      class="w-8 h-8 rounded-full object-cover"
-      style="box-shadow: 0 0 0 1px rgba(0,0,0,0.08);"
+      class="w-7 h-7 rounded-full object-cover block"
     />
-    <span class="font-semibold text-sm" style="color: var(--bronze-12);">{siteConfig.title}</span>
+    <span class="font-semibold text-sm">{siteConfig.title}</span>
   </a>
 
-  <div class="flex items-center gap-1">
-    <ThemeToggle />
-    <!-- Menu button -->
+  <!-- -mr-3.5 offsets the 14px inset of the last 44px target so its glyph meets the gutter -->
+  <div class="flex items-center -mr-3.5">
+    {showToc && (
+      <button
+        id="toc-open-btn"
+        class="icon-link icon-link--touch"
+        aria-label={siteConfig.ui.tocLabel}
+        aria-expanded="false"
+        aria-controls="toc-sheet"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+          <path d="M4 6h16M4 12h10M4 18h13" />
+        </svg>
+      </button>
+    )}
+    <ThemeToggle class="icon-link--touch" />
     <button
-    id="mobile-menu-btn"
-    class="icon-link"
-    aria-label="Toggle navigation"
-    aria-expanded="false"
-  >
-    <svg id="menu-icon-open" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-    </svg>
-    <svg id="menu-icon-close" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="hidden">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-    </svg>
+      id="mobile-menu-btn"
+      class="icon-link icon-link--touch"
+      aria-label="Menu"
+      aria-expanded="false"
+      aria-controls="mobile-nav"
+    >
+      <svg id="menu-icon-open" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+        <path d="M4 7h16M4 12h16M4 17h16" />
+      </svg>
+      <svg id="menu-icon-close" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" class="hidden" aria-hidden="true">
+        <path d="M6 6l12 12M18 6 6 18" />
+      </svg>
     </button>
   </div>
 </div>
 
 <!-- Mobile nav drawer -->
-<div
-  id="mobile-nav"
-  class="hidden lg:hidden px-4 pb-3"
->
-  <nav class="flex flex-col gap-1">
-    {mainLinks.map((link) => {
-      const tabName = link.href === '/post' ? 'posts' : link.href === '/memo' ? 'memos' : undefined;
-      return (
-        <a
-          href={link.href}
-          data-tab={tabName}
-          target={link.external ? '_blank' : undefined}
-          rel={link.external ? 'noopener noreferrer' : undefined}
-          class="flex items-center gap-2 rounded-[var(--radius-md)] py-2 px-4 text-sm font-medium transition-colors hover:bg-sand-3"
-          style="color: var(--sand-11);"
-        ><Fragment set:html={navIcons[link.label] || ''} />{link.label}</a>
-      );
-    })}
-    <div class="flex items-center gap-1 px-3 pt-1">
+<div id="mobile-nav" class="hidden lg:hidden px-4 pb-3">
+  <nav class="flex flex-col gap-0.5">
+    {mainLinks.map((link) => (
+      <a
+        href={link.href}
+        data-tab={tabFor(link.href)}
+        target={link.external ? '_blank' : undefined}
+        rel={link.external ? 'noopener noreferrer' : undefined}
+        aria-current={isActive(link.href, currentPath) ? 'page' : undefined}
+        class="nav-item nav-item--touch"
+      >
+        <Fragment set:html={navIcons[link.label] || ''} />
+        <span class="flex-1">{link.label}</span>
+        {link.external && <Fragment set:html={externalIcon} />}
+      </a>
+    ))}
+    <div class="flex items-center gap-1 pt-1 -ml-3.5">
       {iconLinks.map((link) => (
         <a
           href={link.href}
           target="_blank"
           rel="noopener noreferrer"
-          class="icon-link"
+          class="icon-link icon-link--touch"
           aria-label={link.label}
           title={link.label}
         >
@@ -81,18 +98,9 @@ const iconLinks = siteConfig.navLinks.filter((l) => l.iconOnly);
   const iconClose = document.getElementById('menu-icon-close');
 
   btn?.addEventListener('click', () => {
-    const isHidden = nav?.classList.contains('hidden');
-    if (isHidden) {
-      nav?.classList.remove('hidden');
-      iconOpen?.classList.add('hidden');
-      iconClose?.classList.remove('hidden');
-      btn.setAttribute('aria-expanded', 'true');
-    } else {
-      nav?.classList.add('hidden');
-      iconOpen?.classList.remove('hidden');
-      iconClose?.classList.add('hidden');
-      btn.setAttribute('aria-expanded', 'false');
-    }
+    const open = nav?.classList.toggle('hidden') === false;
+    iconOpen?.classList.toggle('hidden', open);
+    iconClose?.classList.toggle('hidden', !open);
+    btn.setAttribute('aria-expanded', String(open));
   });
 </script>
-

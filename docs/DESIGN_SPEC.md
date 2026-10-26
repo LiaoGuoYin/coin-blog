@@ -13,6 +13,7 @@
 - **Memos 集成** — 通过外部 Memos API 拉取短笔记/动态，客户端渲染
 - **双主题** — 支持 light/dark 模式，系统偏好感知 + 手动切换
 - **响应式布局** — 桌面端侧边栏 + 主内容区；移动端折叠头部 + 全宽内容
+- **克制的视觉语言** — 只用 Radix 色阶、0.5px 细线、4 档字号，不用阴影和彩色左边框（详见 §18）
 - **Cloudflare Pages 部署** — 全球 CDN 静态托管
 
 ---
@@ -42,39 +43,42 @@
 ```
 coin-blog/
 ├── posts/                          # Markdown 博客文章包
-│   └── {slug}/
-│       ├── index.md                # 文章正文
-│       └── assets/                 # 当前文章私有图片与附件
+│   ├── {slug}/
+│   │   ├── index.md                # 文章正文
+│   │   └── assets/                 # 当前文章私有图片与附件
+│   └── draft/                      # 未发布文章包 (scripts/check-drafts.sh 移入)
 ├── public/
 │   ├── avatar.png               # 站点头像 (也用作 favicon)
 │   ├── favicon.png
-│   └── favicon.ico
+│   ├── favicon.ico
+│   └── fonts/                   # 自托管字体 (latin 子集 woff2)
 ├── src/
 │   ├── components/
-│   │   ├── ActivityGraph.astro  # GitHub 风格活跃度贡献图
-│   │   ├── HomePage.astro       # 首页主体 (文章列表 + Memos 标签页)
-│   │   ├── MobileHeader.astro   # 移动端头部导航栏
-│   │   ├── PostListDivided.astro    # 文章列表样式 A: 标题左 + 日期右
-│   │   ├── PostListTwoLine.astro    # 文章列表样式 B: 双行 (标题 + 日期·阅读时间)
-│   │   ├── PostListPreview.astro    # 文章列表样式 C: 带摘要预览
+│   │   ├── HomePage.astro       # 首页主体 (按年分组的文章列表 + Memos 标签页)
+│   │   ├── MobileHeader.astro   # 移动端顶栏 + 导航抽屉
 │   │   ├── Sidebar.astro        # 桌面端左侧边栏
 │   │   └── ThemeToggle.astro    # 深色/浅色模式切换按钮
 │   ├── layouts/
 │   │   └── Layout.astro         # 全局 HTML 布局 (head + body 骨架)
 │   ├── lib/
-│   │   ├── activity.ts          # 活跃度图数据生成逻辑
 │   │   ├── config.ts            # 仅 re-export siteConfig
 │   │   ├── markdown.ts          # Markdown → HTML 渲染 (Shiki 高亮 + 锚点)
+│   │   ├── memo-time.mjs        # Memo 时间戳选取与格式化 (有单测)
+│   │   ├── nav.ts               # 导航分组、激活判断、tab 映射
+│   │   ├── nav-icons.ts         # 导航 SVG 图标 (按 label 索引) + 外链箭头
 │   │   └── posts.ts             # 文章读取、排序、阅读时间估算
 │   ├── pages/
 │   │   ├── index.astro          # / 路由 → 渲染 HomePage
 │   │   ├── post.astro           # /post 路由 → 渲染 HomePage
 │   │   ├── memo.astro           # /memo 路由 → 渲染 HomePage
 │   │   ├── [slug].astro         # /:slug 动态路由 → 文章详情页
+│   │   ├── post-assets/[...path].ts  # 输出文章包内的 assets 文件
 │   │   └── atom.xml.ts          # /atom.xml → Atom RSS feed
 │   └── styles/
-│       └── global.css           # 全局样式、颜色令牌、排版规则
-├── astro.config.mjs             # Astro 配置
+│       └── global.css           # Radix 色阶、语义令牌、排版规则
+├── tests/
+│   └── memo-time.test.mjs       # 运行: node --test tests/*.mjs
+├── astro.config.mjs             # Astro 配置 (Tailwind 插件 + dev 下的 Memos 代理)
 ├── site.config.ts               # 站点级配置 (标题、导航、UI 文案等)
 ├── tsconfig.json                # TypeScript 配置
 ├── package.json                 # 依赖与脚本
@@ -92,42 +96,45 @@ export const siteConfig = {
   title: "Coin's Blog",
   description: "A personal blog by coin",
   author: "coin",
-  url: "https://coin-blog.pages.dev",   // 用于 RSS feed 等绝对 URL
+  url: "https://liaoguoyin.com",        // 用于 RSS feed、canonical 等绝对 URL
   lang: "zh-CN",
   avatar: "/avatar.png",                // public/ 目录下的头像
 
   // 导航链接
+  // external: 新标签打开，主导航中显示外链箭头
+  // iconOnly: 不进主导航，只在底部图标栏渲染
   navLinks: [
-    { href: "/post", label: "Post" },
-    { href: "/memo", label: "Memo" },
-    { href: "/atom.xml", label: "RSS", external: true },
+    { href: "/post", label: "Posts" },
+    { href: "/memo", label: "Memos" },
+    { href: "https://aiusage.liaoguoyin.com", label: "AI Usage", external: true },
+    { href: "/atom.xml", label: "RSS", external: true, iconOnly: true },
+    { href: "https://github.com/LiaoGuoYin/coin-blog", label: "GitHub", external: true, iconOnly: true },
   ],
 
-  // UI 文案 (中文)
+  // UI 文案 (英文；正文内容仍是中文)
   ui: {
-    tocLabel: "本文导览",
-    prevPost: "← 上一篇",
-    nextPost: "下一篇 →",
-    backToTop: "返回顶部",
-    readingTime: (min: number) => `约 ${min} 分钟`,
-    copyButton: "复制",
-    copiedButton: "已复制",
+    tocLabel: "Contents",
+    prevPost: "Previous",
+    nextPost: "Next",
+    readingTime: (min: number) => `${min} min read`,
+    copyButton: "Copy",
+    copiedButton: "Copied",
     noPosts: "No posts yet.",
     noMemos: "No memos yet.",
-    postsHeading: "Posts",
-    allPostsHeading: "All Posts",
-    memosHeading: "Memos",
+    loadMore: "Load more",
+    loading: "Loading",
   },
 
-  // 文章列表展示风格: "divided" | "twoLine" | "preview"
-  postListStyle: "twoLine" as "divided" | "twoLine" | "preview",
+  memosPerPage: 20,                     // 每次加载的 Memo 条数
 
-  // Memos API 地址
-  memosApiUrl: "https://memo.nas.hz.moyumomokan.cn",
+  // dev 下走 astro.config.mjs 里的 /memos-api 代理，避免跨域
+  memosApiUrl: import.meta.env.DEV ? "/memos-api" : "https://memo.liaoguoyin.com",
 };
 ```
 
 `src/lib/config.ts` 仅做 re-export：`export { siteConfig } from '../../site.config';`
+
+导航图标在 `src/lib/nav-icons.ts` 中**按 `label` 索引**，改 label 时要同步改图标的 key。
 
 ---
 
@@ -135,7 +142,7 @@ export const siteConfig = {
 
 ### 5.1 Astro 配置 (`astro.config.mjs`)
 
-极简配置，仅注册 Tailwind CSS v4 的 Vite 插件：
+注册 Tailwind CSS v4 的 Vite 插件，并在 dev server 上把 `/memos-api` 代理到 Memos 服务：
 
 ```javascript
 import { defineConfig } from 'astro/config';
@@ -144,9 +151,20 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
+    server: {
+      proxy: {
+        '/memos-api': {
+          target: 'https://memo.liaoguoyin.com',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/memos-api/, ''),
+        },
+      },
+    },
   },
 });
 ```
+
+`memosApiUrl` 在 dev 下是相对路径，客户端构造请求时必须带 base：`new URL(path, location.origin)`。
 
 ### 5.2 TypeScript (`tsconfig.json`)
 
@@ -238,24 +256,29 @@ interface Post extends PostMeta {
 
 ### 6.2 Memo (来自外部 API)
 
-**数据源**：外部 Memos API (`siteConfig.memosApiUrl`)
+**数据源**：外部 Memos API (`siteConfig.memosApiUrl`)，只读公开 Memo，无鉴权
 
-**API 调用**：`GET {memosApiUrl}/api/v1/memos?pageSize=50&pageToken={token}`
+**API 调用**：`GET {memosApiUrl}/api/v1/memos?pageSize={memosPerPage}&pageToken={token}`，按需分页（点 Load more 才取下一页）
 
 **TypeScript 接口**：
 
 ```typescript
 interface Memo {
-  name: string;
-  content: string;       // Markdown 格式
-  displayTime: string;   // ISO 8601
+  name: string;                  // "memos/123"，/ 换成 - 后作为 DOM id 和锚点
+  content: string;               // Markdown 格式
+  createTime: string;            // ISO 8601
+  updateTime?: string;
+  displayTime?: string | null;   // 可能缺失
   tags: string[];
   pinned: boolean;
   snippet: string;
+  attachments: MemoAttachment[]; // 只渲染 image/* 类型
 }
 ```
 
-**排序规则**：Pinned 优先 → 按 `displayTime` 降序
+**展示时间**：`displayTime` → `createTime` → `updateTime` 依次兜底（`lib/memo-time.mjs`），格式 `YYYY-MM-DD HH:mm`
+
+**排序规则**（每页内）：Pinned 优先 → 按 `createTime` 降序
 
 ---
 
@@ -292,10 +315,12 @@ interface Memo {
 
 页面结构：
 
-1. **Header**: ← Posts 返回链接 + 标题 + 日期·阅读时间
-2. **Body**: 左侧为文章正文 (`prose` 排版)，右侧为 TOC (目录导航，`>1100px` 才显示)
+1. **Header**: 标题 + 元信息行（等宽字体日期、阅读时长，两项只用 16px 间距分开）
+2. **Body**: 左侧文章正文 (`prose`)，右侧 TOC（`lg` 1024px 起显示）
 3. **Prev/Next 导航**: 底部上下篇链接
-4. **回到顶部按钮**: 固定定位，滚动超过 400px 后显示
+4. **移动端目录**: 顶栏的 Contents 按钮打开全屏目录面板（见 §15.2）
+
+没有返回链接、回到顶部按钮和阅读进度条：侧边栏的 Posts 在文章页保持激活，已经承担返回入口。
 
 ### 7.4 RSS Feed (`atom.xml.ts`)
 
@@ -314,18 +339,17 @@ interface Memo {
 ┌─────────────────────────────────────────────┐
 │ <html>                                       │
 │ <head>                                       │
-│   · meta charset, viewport, description      │
-│   · title                                    │
-│   · favicon (avatar.png)                     │
-│   · RSS link                                 │
-│   · Dark mode 初始化脚本 (内联, 防闪烁)       │
-│   · Google Fonts 预连接 + 加载               │
+│   meta charset, viewport, description        │
+│   title, canonical, Open Graph               │
+│   favicon (avatar.png), RSS link             │
+│   Dark mode 初始化脚本 (内联, 防闪烁)         │
+│   自托管字体 preload (Poppins 400, Lora)     │
 │ </head>                                      │
 │ <body>                                       │
 │   <div class="site-layout flex ...">         │
 │     ┌──────────┬──────────────────────┐      │
-│     │ Sidebar  │ <main>               │      │
-│     │ (desktop │   <div> 白色卡片容器  │      │
+│     │ Sidebar  │ <main class="p-2">   │      │
+│     │ (desktop │   <div> 内容面板      │      │
 │     │  only)   │     <slot />         │      │
 │     │          │   </div>             │      │
 │     │          │ </main>              │      │
@@ -339,25 +363,18 @@ interface Memo {
 └─────────────────────────────────────────────┘
 ```
 
-**关键 CSS 变量**（在 `.site-layout` 上设置）：
+**Props**：`title`、`description`、`ogType`、`showToc`（文章页有标题时为 true，控制移动端顶栏的 Contents 按钮）
 
-```css
---link-color: var(--blue-11);
---primary-text-color: var(--bronze-12);
---secondary-text-color: var(--grass-11);
---site-background-color: var(--gold-2);
-```
+**两层表面**：
+
+- 外层 chrome（body、侧边栏、移动端顶栏）：`--bg-chrome`
+- 内容面板：`--bg-panel` 背景，`0.5px solid var(--line-chrome)` 细线，`--radius-panel` (12px)，**无阴影**
+- `<main>` 的 8px 内边距让面板四周留出一圈 chrome
 
 **响应式断点**：
 
-- `lg` (1024px): Sidebar 显示，`flex-row` 布局
+- `lg` (1024px): Sidebar 显示，`flex-row` 布局，内容区独立滚动 (`lg:overflow-y-scroll lg:max-h-screen`)
 - 移动端: MobileHeader 显示，`flex-col` 布局
-
-**主内容区**：
-
-- `lg:overflow-y-scroll lg:max-h-screen` — 桌面端内容区独立滚动
-- 白色卡片容器：`rounded-2xl`，带阴影 `box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 0 1px rgba(0,0,0,0.1)`
-- 暗色模式卡片背景覆盖为 `var(--sand-2)`
 
 ### 8.2 Dark Mode 初始化
 
@@ -377,36 +394,37 @@ interface Memo {
 
 ### 9.1 Sidebar (`components/Sidebar.astro`)
 
-**仅桌面端显示** (`hidden lg:flex`)
+**仅桌面端显示** (`hidden lg:flex`)，宽 `lg:w-56`，`px-4 py-6`，区块间距 32px。
 
 结构 (从上到下)：
 
-1. **Logo 区域**: 头像 (圆形 40x40) + 站点标题 + ThemeToggle
-2. **导航链接**: 遍历 `siteConfig.navLinks`
-   - 当前激活项：`shadow-border bg-white` + `color: var(--sand-12)`
-   - 普通项：`hover:bg-sand-3` + `color: var(--sand-11)`
-   - 激活判断：`/post` 路由匹配 `/` 或 `/post` 开头的路径
-3. **Activity Graph**: 固定在底部 (`mt-auto`)
+1. **头部行**: 头像 (圆形 32px，无阴影) + 站点标题 (14px/600) + ThemeToggle（`-mr-2`，图标和右边距光学对齐）
+2. **主导航**: `mainLinks`（非 `iconOnly` 的链接），每项是 `.nav-item`：图标 + 文字 + 外链箭头 (仅 external)
+3. **底部图标栏**: `iconLinks`（RSS、GitHub），32px `.icon-link`，`-ml-2` 光学对齐
 
-宽度：`lg:w-48 xl:w-56`
+**`.nav-item`** (`global.css`)：
+
+- 高 36px，`padding: 0 8px; margin: 0 -8px` —— 背景向两侧外扩，图标和文字仍落在 16px 栏线上
+- 14px/500，`--text-2`，`--radius-control` (8px)
+- hover：`--nav-hover` 背景 + `--text`
+- 激活：`[aria-current="page"]` → `--nav-selected` 背景 + `--text`
+- 激活判断 (`lib/nav.ts` 的 `isActive`)：`/memo` 只在 `/memo` 激活；`/post` 在其余所有内部页激活（文章页归属 Posts）
 
 ### 9.2 MobileHeader (`components/MobileHeader.astro`)
 
 **仅移动端显示** (`lg:hidden`)
 
-结构：
+1. **顶栏** (`h-14 px-4`): 头像 (28px) + 站点标题 | 操作区
+   - 操作区按钮都是 44px 触控目标 (`.icon-link--touch`)，容器 `-mr-3.5` 抵消最后一个按钮的内缩
+   - 顺序：Contents（仅 `showToc`）→ ThemeToggle → 菜单
+2. **导航抽屉** `#mobile-nav`: 初始 `hidden`，点击菜单按钮切换；条目为 `.nav-item.nav-item--touch`（高 44px，`margin: 0 -12px`），底部图标栏同样 44px
 
-1. **顶栏**: Logo 头像 (32x32) + 站点标题 | ThemeToggle + 汉堡菜单按钮
-2. **可折叠导航抽屉**: 初始 `hidden`，点击汉堡按钮切换
-
-菜单按钮行为：
-
-- 打开：汉堡图标 → X 图标，`aria-expanded="true"`
-- 关闭：X 图标 → 汉堡图标，`aria-expanded="false"`
+菜单按钮切换汉堡/X 图标并同步 `aria-expanded`，没有展开动画。
 
 ### 9.3 ThemeToggle (`components/ThemeToggle.astro`)
 
-- Sun 图标 (暗色模式下显示) / Moon 图标 (亮色模式下显示)
+- 接受 `class` prop，调用方用它追加光学对齐的负 margin 或 `icon-link--touch`
+- Sun 图标 (暗色模式下显示) / Moon 图标 (亮色模式下显示)，1.5 描边
 - 通过 CSS `.dark .theme-icon-sun { display: block }` 控制图标显隐
 - 点击时：读取当前主题 → 切换 → 更新 `<html>` class + `localStorage`
 
@@ -414,120 +432,53 @@ interface Memo {
 
 核心内容组件，被 `/`、`/post`、`/memo` 三个路由共用。
 
-结构：
-
 ```
 <Layout>
-  <div class="p-5 sm:p-8 flex flex-col gap-4">
-    <section id="tab-posts">     ← 文章列表
-    <section id="tab-memos">     ← Memos 时间线
+  <div class="px-4 py-5 sm:px-16 sm:py-12">
+    <section id="tab-posts" class="max-w-[720px]">   ← 按年分组的文章列表
+    <section id="tab-memos" class="max-w-[640px]">   ← Memos 流
   </div>
 </Layout>
 ```
 
-**文章列表**根据 `siteConfig.postListStyle` 选择渲染组件：
+**文章列表**（只有一种样式，不分页，全部渲染）：
 
-- `"divided"` → `<PostListDivided />`
-- `"twoLine"` → `<PostListTwoLine />` (当前默认)
-- `"preview"` → `<PostListPreview />`
+```
+2025    用 Git 裸仓库在多台内网机器中同步代码        10-10
+        俺的电子垃圾列表                             08-31
+─────────────────────────────────────────────────────
+2024    Zerotier 组网之自建 Moon 加速节点           11-27
+```
 
-**Memos 标签页**包含三个状态：
+- 构建时按 `formatDate(date).slice(0, 4)` 分组（文章已按日期降序，分组天然有序）
+- `.year-group`：上下 16px 内边距，组之间 0.5px `--line` 分隔；`sm` 起为 `80px 1fr` 两列网格，窄屏年份在上
+- `.year-label`：等宽 12px，`--text-2`
+- `.post-item`：标题 + 右侧等宽 `MM-DD`，上下 10px；hover 时标题变 `--accent-text`
 
-1. `#memo-loading` — 骨架屏动画 (5 个 shimmer 条目)
-2. `#memo-error` — 错误/空状态文案
-3. `#memo-list` — 实际内容容器
+**Memos 标签页**的状态：
+
+1. `#memo-loading` — 4 条静态占位条（无 shimmer 动画）
+2. `#memo-error` — 空数据或请求失败时显示 `noMemos`
+3. `#memo-list` — 实际内容（见 §16）
+4. `#memo-load-more` — 还有下一页时显示 Load more 按钮，没有就整块隐藏（不显示禁用态）
 
 #### 客户端 Memos 渲染逻辑
 
-1. 初始化客户端 MarkdownIt 实例 (与构建时同配置: Shiki 双主题 + GitHub Alerts)
-2. `fetchAllMemos()` — 分页获取所有 Memos，50 条/页
-3. 并行执行 Markdown 渲染器初始化 + 数据获取 (`Promise.all`)
-4. 渲染为时间线 HTML 注入 `#memo-list`
+1. 懒初始化客户端 MarkdownIt 实例 (`breaks: true` + strikethrough + GitHub Alerts，不含语法高亮)
+2. `fetchMemoPage(pageToken)` — 每次取 `memosPerPage` 条
+3. 渲染为 `<article class="memo-item">` 注入 `#memo-list`，Load more 时追加
+4. 首屏加载后若 URL 带 Memo 锚点，`scrollIntoView` 定位
 
 #### 客户端 Tab 切换逻辑
 
 ```javascript
-// 1. 拦截导航链接点击 → e.preventDefault()
+// 0. 内联脚本在首帧前根据 pathname / #memos- hash 隐藏对应 section，防闪烁
+// 1. 拦截带 data-tab 的导航链接点击 → e.preventDefault()
 // 2. history.replaceState 更新 URL (/post 或 /memo)
 // 3. 切换 .tab-hidden class
-// 4. 更新导航链接样式 (active vs inactive)
+// 4. 只切换 a[data-tab] 的 aria-current，样式全由 CSS 决定
 // 5. 首次切到 Memos 时触发 loadMemos()
 ```
-
-### 9.5 ActivityGraph (`components/ActivityGraph.astro`)
-
-GitHub 风格的活跃度贡献图。
-
-**侧边栏小图**：
-
-- 展示最近 5 周 (35 天)
-- 7 行 × 5 列网格，`grid-auto-flow: column`（周一在顶部）
-- 颜色等级：
-  - 无活动: `var(--sand-4)` (浅灰)
-  - 有 Post 或 Memo: `var(--grass-7)` (浅绿)
-  - 同时有 Post 和 Memo: `var(--grass-9)` (深绿)
-- 未来日期: `visibility: hidden`
-- 顶部月份标签行
-
-**全屏模态框**：
-
-- 点击展开按钮打开
-- 展示最近 10 年，每年一行
-- 每年从 1 月 1 日所在周的周一开始，到 12 月 31 日所在周的周日结束
-- 底部图例: Less → 浅灰 → 浅绿 → 深绿 → More
-- ESC 或点击遮罩层关闭
-
-**数据流**：
-
-1. 构建时：从文章列表提取发布日期 → 传入组件 (SSG)
-2. 运行时：异步 fetch Memos API 获取 memo 日期 → 动态更新 cell 颜色/类型
-
-**交互**：
-
-- Hover: 显示 tooltip (`YYYY-MM-DD · Post/Memo/Post & Memo/No activity`)
-- Click: 导航到对应文章 (`/slug`) 或 Memo 页面 (`/memo`)
-
-### 9.6 PostList 三种样式
-
-**PostListDivided**:
-
-```
-┌─────────────────────────────────────────┐
-│ 文章标题                    2025-03-13  │
-│─────────────────────────────────────────│
-│ 文章标题                    2025-03-12  │
-└─────────────────────────────────────────┘
-```
-
-标题左对齐，日期右对齐，底部细线分隔。
-
-**PostListTwoLine** (默认):
-
-```
-┌─────────────────────────────────────────┐
-│ 文章标题                                │
-│ 2025-03-13 · 约 5 分钟                  │
-│                                         │
-│ 文章标题                                │
-│ 2025-03-12 · 约 3 分钟                  │
-└─────────────────────────────────────────┘
-```
-
-标题一行 + 日期·阅读时间一行，带 `border-bottom` 分隔。
-
-**PostListPreview**:
-
-```
-┌─────────────────────────────────────────┐
-│ 文章标题                    2025-03-13  │
-│ 正文前80字摘要预览文本...               │
-│─────────────────────────────────────────│
-│ 文章标题                    2025-03-12  │
-│ 正文前80字摘要预览文本...               │
-└─────────────────────────────────────────┘
-```
-
-摘要通过 `getExcerpt()` 函数生成：去除 Markdown 语法后取前 80 字符，超出加 `…`。
 
 ---
 
@@ -567,12 +518,13 @@ Slugify 函数：`encodeURIComponent(s.trim().toLowerCase().replace(/\s+/g, '-')
 
 ### 10.3 客户端渲染 (Memos 用)
 
-HomePage 中的 Memos 使用独立的客户端 MarkdownIt 实例，配置与构建时类似但有差异：
+HomePage 中的 Memos 使用独立的轻量 MarkdownIt 实例，和构建时的差异：
 
 - `breaks: true` (构建时为 false)
+- 无 Shiki 语法高亮 (代码块用普通 `pre` 样式，避免把高亮器打进客户端包)
 - 无 `markdown-it-anchor` (Memo 不需要锚点)
 - 无 `image_to_figure` (Memo 不需要 figure 标签)
-- 同样有 Shiki 双主题 + GitHub Alerts + 未知语言 fallback
+- 保留 strikethrough + GitHub Alerts
 
 ### 10.4 Image → Figure 转换
 
@@ -591,8 +543,8 @@ HomePage 中的 Memos 使用独立的客户端 MarkdownIt 实例，配置与构�
 
 ```typescript
 function estimateReadingTime(content: string): number {
-  const chineseChars = (content.match(/[\u4e00-\u9fff]/g) || []).length;
-  const englishWords = content.replace(/[\u4e00-\u9fff]/g, '').split(/\s+/).filter(Boolean).length;
+  const chineseChars = (content.match(/[一-鿿]/g) || []).length;
+  const englishWords = content.replace(/[一-鿿]/g, '').split(/\s+/).filter(Boolean).length;
   const minutes = chineseChars / 300 + englishWords / 200;
   return Math.max(1, Math.round(minutes));
 }
@@ -604,41 +556,82 @@ function estimateReadingTime(content: string): number {
 
 ## 12. 颜色系统
 
-### 12.1 设计语言
+### 12.1 色阶
 
-使用 **Radix UI 颜色系统**的 12 级色阶，5 个色族：
+使用 **Radix UI Colors** 的 12 级色阶，6 个色族：
 
 | 色族 | 用途 |
 |------|------|
-| **Sand** | 中性灰色，用于背景、边框、文字 |
-| **Gold** | 暖色调背景 (`gold-2` 是页面底色) |
-| **Blue** | 链接颜色 |
-| **Bronze** | 主要文字和标题 |
-| **Grass** | 强调色/成功色/活跃状态 |
+| **Sand** | 中性色：面板、元素背景、细线、文字 |
+| **Gold** | 品牌色：外层 chrome 背景、导航 hover/选中、选区、强调文字 |
+| **Blue** | Note 提示块 |
+| **Grass** | Tip 提示块 |
+| **Bronze** | Important 提示块 |
+| **Red** | Caution 提示块 |
 
-### 12.2 CSS 变量声明
+另有 `--black-a11` (`rgba(0,0,0,0.9)`，Radix blackA 11) 用于图片 lightbox 遮罩。
 
-在 `global.css` 中：
+**按 Radix 的步骤语义取色**，不跨用途借用：
 
-- `:root, .light, .light-theme` — 亮色模式下的所有色阶
-- `.dark, .dark-theme` — 暗色模式下的所有色阶
+| 步骤 | 用途 |
+|------|------|
+| 1–2 | 应用背景 |
+| 3–5 | 组件背景（常态 / hover / 选中） |
+| 6–8 | 边框与分隔线 |
+| 9–10 | 实色填充 |
+| 11–12 | 文字（11 次要 / 12 主要） |
 
-每个色族 12 级 (1-12)：1 最浅，12 最深 (暗色模式相反)。
+### 12.2 语义令牌
 
-### 12.3 Tailwind v4 集成
+组件**只引用语义令牌**，不直接写色阶。令牌定义在 `global.css` 的 `:root`，`.dark` 只覆盖与亮色不同的映射：
 
-通过 `@theme inline` 块将 CSS 变量映射为 Tailwind 颜色工具类：
+| 令牌 | Light | Dark | 用途 |
+|------|-------|------|------|
+| `--bg-chrome` | gold-2 | gold-1 | body、侧边栏、移动端顶栏 |
+| `--bg-panel` | sand-1 | sand-2 | 内容面板、浮层按钮底 |
+| `--bg-subtle` | sand-2 | sand-3 | 代码块、引用块 |
+| `--bg-element` | sand-3 | sand-4 | 行内代码、按钮 hover |
+| `--nav-hover` | gold-3 | gold-3 | 导航 / 图标按钮 hover |
+| `--nav-selected` | gold-4 | gold-4 | 当前导航项 |
+| `--selection` | gold-5 | gold-5 | `::selection` |
+| `--line` | sand-6 | sand-6 | 内容区分隔线、代码块边框 |
+| `--line-chrome` | gold-6 | gold-6 | 内容面板外框 |
+| `--line-control` | sand-7 | sand-7 | 按钮边框 |
+| `--text` | sand-12 | sand-12 | 主要文字 |
+| `--text-2` | sand-11 | sand-11 | 次要文字、日期、标签 |
+| `--accent-text` | gold-11 | gold-11 | 正文链接、TOC 当前项、标题 hover |
+
+暗色模式下色阶本身也会切换（Radix dark scale），所以同名步骤在两种主题下都成立。
+
+### 12.3 其他令牌
+
+```css
+--radius-inline: 4px;    /* 行内代码、代码块内的复制按钮 */
+--radius-control: 8px;   /* 导航项、图标按钮、引用块、提示块、Load more */
+--radius-block: 10px;    /* 代码块 */
+--radius-panel: 12px;    /* 内容面板 */
+--ease-base: 250ms ease-out;  /* 全站唯一的过渡曲线 */
+```
+
+**同心圆角**：嵌套元素的圆角 = 外层圆角 − 间距。例如复制按钮距代码块边缘 6px，代码块 10px，按钮取 4px。
+
+### 12.4 Tailwind v4 集成
+
+通过 `@theme inline` 块将色阶映射为 Tailwind 颜色工具类（sand / gold / blue / bronze / grass 各 12 级）：
 
 ```css
 @theme inline {
   --color-sand-1: var(--sand-1);
   --color-sand-2: var(--sand-2);
-  /* ... 完整映射 5 色族 × 12 级 = 60 个颜色 */
-  --shadow-border: 0 0 0 1px var(--sand-6);
+  /* ... */
 }
 ```
 
+组件实际上主要用 `style="color: var(--text-2)"` 或 scoped CSS 引用语义令牌，Tailwind 只负责布局类。
+
 暗色模式自定义变体：`@custom-variant dark (&:where(.dark, .dark *));`
+
+**层叠注意**：`global.css` 中没包在 `@layer` 里的规则优先级高于 Tailwind 工具类（工具类在 `@layer utilities` 里）。所以 `.nav-item` 的负 margin 直接写在全局规则里；`.icon-link` 全局不设 margin，调用处才能用 `-mr-2` 这类工具类做光学对齐。
 
 ---
 
@@ -646,54 +639,60 @@ function estimateReadingTime(content: string): number {
 
 ### 13.1 字体加载
 
-通过 Google Fonts CDN 加载：
+自托管于 `public/fonts/`（latin 子集 woff2），`@font-face` 写在 `global.css`，统一 `font-display: optional`；`Layout.astro` 只 preload Poppins 400 和 Lora 两个首屏必需文件。中文字符走系统字体回退。
 
-| 字体 | 用途 | 字重 |
-|------|------|------|
-| Poppins | 全站 UI 文字 (sans-serif) | 400, 500, 600 |
-| Lora | 文章正文 (serif) | 400, 500, 600 (含 italic) |
-| JetBrains Mono | 代码/日期 (monospace) | 400, 500 |
-
-### 13.2 防布局偏移 Fallback
+| 字体 | 变量 | 用途 | 字重 |
+|------|------|------|------|
+| Poppins | `--font-ui` | 全站 UI、文章内标题、图注 | 400, 500, 600 |
+| Lora | `--font-body` | 文章正文 | 400–600 (可变)，italic 400 |
+| JetBrains Mono | `--font-mono` | 代码、日期、年份 | 400–500 (可变) |
 
 ```css
-@font-face {
-  font-family: "Poppins Fallback";
-  src: local("Arial");
-  size-adjust: 110%;
-  ascent-override: 105%;
-  descent-override: 35%;
-  line-gap-override: 10%;
-}
-
-@font-face {
-  font-family: "Lora Fallback";
-  src: local("Georgia");
-  size-adjust: 97%;
-  ascent-override: 100%;
-  descent-override: 30%;
-  line-gap-override: 0%;
-}
+--font-ui: "Poppins", system-ui, -apple-system, sans-serif;
+--font-body: "Lora", Georgia, "Times New Roman", serif;
+--font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Menlo, monospace;
 ```
+
+### 13.2 字号阶梯
+
+全站**只有 4 档字号**，最小 12px：
+
+| 字号 / 行高 | 用途 |
+|-------------|------|
+| 24 / 32 | 文章 h1 |
+| 16 / 28 | 文章正文；文章内 h2/h3/h4 (16/24) |
+| 14 / 20 | UI 正文：导航、列表标题、Memo 正文 (14/24)、代码 (14/22)、表格、提示块标题、Load more |
+| 12 / 20 | 元信息：日期、阅读时长、年份、TOC、标签、图注、复制按钮 |
+
+文章内标题不放大字号，用 UI 字体 + 字重区分层级：h2/h3 为 600，h4 为 500；上边距 h2 40px、h3 32px、h4 24px。
 
 ### 13.3 Prose 排版规则
 
+`@tailwindcss/typography` 的 `--tw-prose-*` 变量全部映射到语义令牌（正文 `--text`、链接 `--accent-text`、分隔线 `--line` 等）。
+
 ```css
 .prose {
-  font-family: "Lora", "Lora Fallback", Georgia, "Times New Roman", serif;
-  font-size: 1.0625rem;    /* 17px */
-  line-height: 1.85;
-  font-weight: 500;
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 28px;
+  font-weight: 400;
+  text-align: justify;
+  text-autospace: ideograph-alpha ideograph-numeric;
 }
 ```
 
-### 13.4 特殊排版规则
+- 段落下边距 16px；列表上 12px 下 16px，`li` 上下 4px
+- `hr`、表格行线均为 0.5px
 
-- **选区颜色**: `::selection { background-color: rgba(204, 120, 92, 0.25); }`
-- **Inline code** (非 `<pre>` 内): 灰底 `sand-3`，小圆角，`sand-5` 边框，`0.875em` 字号，隐藏 Markdown 反引号 (`::before/::after { content: none }`)
-- **Blockquote**: 灰底 `sand-2`，`bronze-8` 左边框 3px，圆角 0.375rem，斜体
-- **外部链接**: 自动加箭头图标 (SVG 内联 `::after` 伪元素)，含图片的链接不显示
-- **代码块** (Shiki): `sand-2` 背景，`sand-5` 边框，0.5rem 圆角；暗色模式使用 `--shiki-dark` 变量
+### 13.4 块级元素
+
+- **选区**: `::selection { background-color: var(--selection); }`
+- **Inline code** (非 `<pre>` 内): `--bg-element` 底，无边框，`--radius-inline`，14px/400，隐藏 Markdown 反引号 (`::before/::after { content: none }`)
+- **Blockquote**: `--bg-subtle` 底，**无边框**，`--radius-control`，`12px 16px` 内边距，`--text-2`，正体（不斜体），去掉 typography 插件自动加的引号
+- **Figcaption**: UI 字体 12/20，`--text-2`，居中，正体
+- **链接**: `--accent-text`，无下划线，hover 变 `gold-12`
+- **外部链接**: `a[href^="http"]::after` 用 `mask` + `background-color: currentColor` 画箭头图标（跟随文字颜色），透明度 0.6；含图片的链接不显示
+- **代码块** (Shiki): 背景强制 `--bg-subtle`（两种主题都用 Radix 底色，token 颜色仍来自 github-light/dark），0.5px `--line` 边框，`--radius-block`，`16px 20px` 内边距，14/22；暗色模式通过 `.dark .shiki span { color: var(--shiki-dark) !important }` 切换 token 色
 
 ---
 
@@ -704,95 +703,105 @@ function estimateReadingTime(content: string): number {
 ```css
 .scrollable-area {
   scrollbar-width: thin;
-  scrollbar-color: var(--sand-6) transparent;
+  scrollbar-color: var(--line) transparent;
 }
-/* WebKit: 4px 宽，sand-6 圆角滑块 */
+/* WebKit: 4px 宽，--line 色滑块 */
 ```
 
-### 14.2 GitHub Alerts / Callouts
+### 14.2 图标按钮 `.icon-link`
 
-5 种类型，每种有独立配色：
+- 32×32，`--radius-control`，`--text-2`；hover 为 `--nav-hover` 背景 + `--text`
+- `.icon-link--touch`：44×44，移动端使用
+- 调用处用负 margin（桌面 -8px，移动端 -14px）让图标本身而不是点击区域对齐栏线
 
-| 类型 | 背景 | 边框 | 标题色 |
-|------|------|------|--------|
-| Note | blue-2 | blue-8 | blue-11 |
-| Tip | grass-2 | grass-8 | grass-11 |
-| Important | bronze-2 | bronze-8 | bronze-11 |
-| Warning | gold-2 | gold-8 | gold-11 |
-| Caution | #fef2f2 | #f87171 | #dc2626 |
+### 14.3 GitHub Alerts / Callouts
 
-### 14.3 Code Copy 按钮
+用 Radix 步骤 3 做背景、步骤 11 做标题色，**无边框、无彩色左边框**；`--radius-control`，`12px 16px` 内边距；标题为 UI 字体 14/20/600。
 
-- 绝对定位于代码块右上角
-- 默认 `opacity: 0`，hover 时显示
-- 点击后文字从 "复制" 变为 "已复制"，1.5 秒后恢复
+| 类型 | 背景 | 标题色 |
+|------|------|--------|
+| Note | blue-3 | blue-11 |
+| Tip | grass-3 | grass-11 |
+| Important | bronze-3 | bronze-11 |
+| Warning | gold-3 | gold-11 |
+| Caution | red-3 | red-11 |
 
-### 14.4 Heading Anchor
+### 14.4 Code Copy 按钮
 
-- 绝对定位于标题左侧
-- 默认 `opacity: 0`，hover 标题时显示 `#` 符号
+- 运行时把 `.shiki` 包进 `.shiki-wrapper`，按钮绝对定位在 `top: 6px; right: 6px`
+- 高 28px，0.5px `--line-control` 边框，`--radius-inline`，`--bg-panel` 底，12px/500
+- **始终可见**（触屏没有 hover，不做隐藏）
+- 点击后文字从 "Copy" 变为 "Copied"，1.5 秒后恢复
+
+### 14.5 Heading Anchor
+
+- 绝对定位于 h2/h3 左侧，`--text-2`
+- 默认 `opacity: 0`，hover 标题时以 `--ease-base` 淡入 `#`
 - 点击时复制完整 URL 到剪贴板，显示 `✓`，1.5 秒后恢复
 
 ---
 
 ## 15. 文章详情页交互
 
-### 15.1 TOC (目录导航)
+### 15.1 TOC (目录导航，桌面端)
 
-- 仅在 `>1100px` 屏幕宽度时显示
-- 宽度：`13rem`，`>1440px` 时 `16rem`
-- `position: sticky; top: 1.5rem`
-- 左侧 2px `sand-5` 竖线，当前项为 `bronze-12` 粗体
-
-**Progress Bar**：
-
-- 绝对定位覆盖在竖线上
-- `bronze-9` 颜色
-- 高度跟随页面滚动百分比 (`scrollTop / (scrollHeight - clientHeight) * 100`)
+- `lg` (1024px) 起显示；宽 176px，`xl` 起 208px
+- `position: sticky; top: 48px`（`xl` 起 64px）
+- 标题 "Contents"：12/20/600，`--text`，不大写、不加字距
+- 条目：12/20，`4px 0` 内边距，`--text-2`；h3 缩进 12px
+- 当前项：`--accent-text` + 500 字重；**无竖线、无进度条**
 
 **Active 高亮**：
 
-- 监听滚动事件 (passive)
-- 向上遍历所有标题元素，找到最后一个 `rect.top <= 80` 的标题
-- 到达页面底部 (距底 <=2px) 时激活最后一个标题
+- `IntersectionObserver` (`rootMargin: -80px 0px 0px 0px`) 追踪进入视口的标题，取文档顺序中第一个
+- 没有标题在视口内时，取最后一个已滚过顶部的标题
+- 滚动到底部 (距底 <=2px) 时激活最后一个标题
 - 自动适配自定义滚动容器 (找到最近的 `overflow-y: auto/scroll` 祖先)
+- 同一个 active 状态同步到移动端目录面板
 
-### 15.2 Back to Top
+### 15.2 移动端目录面板
 
-- 固定定位 `bottom: 2rem; right: 2rem`
-- 滚动超过 400px 时 `opacity: 1`，否则 `opacity: 0; pointer-events: none`
-- 点击时 `scrollTo({ top: 0, behavior: 'smooth' })`
+- 入口：移动端顶栏的 Contents 按钮 `#toc-open-btn`（仅文章有标题时渲染），`aria-controls="toc-sheet"`，`aria-expanded` 随开关同步
+- 面板 `#toc-sheet`：`position: fixed`，从顶栏下方 (56px) 铺到底部，左右各留 8px；`--bg-panel` 底，0.5px `--line-chrome` 外框，顶部 12px 圆角——和内容面板同形
+- **无动画**，直接显示/隐藏 (`hidden` 属性)；打开时锁定 body 滚动
+- 头部：标题 "Contents" 14/600 + 44px 关闭按钮
+- 条目：最小高 44px，14px，h3 缩进 16px；当前项 `--accent-text` + 500
+- 关闭方式：关闭按钮、点任一条目、`Esc`
 
 ### 15.3 Prev/Next 导航
 
-- 位于文章底部，`border-top: 1px solid var(--sand-5)` 分隔
-- Flex 布局，上一篇靠左，下一篇靠右 (`margin-left: auto; text-align: right`)
-- 标签文字 (`← 上一篇` / `下一篇 →`) + 文章标题
-- Hover 时标题变为 `grass-11` 色
+- 位于文章底部，上边距 48px，`border-top: 0.5px solid var(--line)`，上内边距 24px
+- 两列等宽网格，上一篇在左，下一篇在右对齐；缺一侧时用空 `<div>` 占位
+- 标签 (`Previous` / `Next`) 12/20 `--text-2`，标题 14/20/500 `--text`
+- Hover 时标题变为 `--accent-text`
 
 ---
 
-## 16. Activity Graph 数据逻辑
+## 16. Memos 列表 UI
 
-### 16.1 网格生成 (`src/lib/activity.ts`)
+纵向列表，没有时间线竖线、圆点或卡片：
 
-```typescript
-generateGrid(weeks: number): { cells: GridCell[], monthLabels: { text: string, col: number }[] }
+```
+2026-04-26 08:04
+不要再碰触制造的东西了
+─────────────────────────────
+2026-04-18 11:12
+好的产品功能入口是唯一的…
+#tag1 #tag2
+─────────────────────────────
 ```
 
-1. 找到本周一 (Monday)
-2. 向前推 `weeks - 1` 周，得到起始周一
-3. 按列优先生成 cells (`grid-auto-flow: column`)：外循环 col (周)，内循环 row (周一到周日)
-4. 月份标签：当 row=0 且月份变化时记录
+- `.memo-item`：纵向 flex，子元素间距 8px，上下 20px，条目之间 0.5px `--line` 分隔
+- `.memo-time`：等宽 12px `--text-2`，本身就是固定链接 (`/memo#memos-123`)，hover 变 `--accent-text`
+- `.memo-body`：14/24；内部 blockquote、pre、code 复用语义令牌，规则同文章 prose 的简化版
+- `.memo-tags`：12px `--text-2` 纯文字 `#tag`，不加背景
+- `.memo-images`：`auto-fill, minmax(200px, 1fr)` 网格，间距 8px；点击图片打开 lightbox
 
-### 16.2 日期工具函数
+**Lightbox**：全屏 `--black-a11` 遮罩，无模糊、无阴影，透明度以 `--ease-base` 过渡；图片最大 90vw × 90vh，`--radius-control`；点击遮罩或 `Esc` 关闭
 
-- `getPostDateSet(posts)` — 返回 `Set<string>` (YYYY-MM-DD)
-- `getPostDateSlugMap(posts)` — 返回 `Record<string, string>` (date → first post slug)
+**加载占位**：4 条静态 `--bg-element` 条块（日期条 + 正文条），不做 shimmer
 
-### 16.3 Memo 日期获取
-
-客户端异步 fetch Memos API，提取 `displayTime` 中的日期部分 (YYYY-MM-DD)。
+**Load more 按钮**：高 36px，14px/500，`--bg-panel` 底，0.5px `--line-control` 边框，`--radius-control`，hover 为 `--bg-element`；加载中文字变 "Loading"
 
 ---
 
@@ -826,38 +835,27 @@ generateGrid(weeks: number): { cells: GridCell[], monthLabels: { text: string, c
 
 ---
 
-## 18. Memos Timeline UI
+## 18. 设计原则
 
-垂直时间线样式：
+视觉与交互改动必须满足以下约束：
 
-```
-│
-├ ● ┌─────────────────────────┐
-│   │ 2025-03-13 14:30        │
-│   │ #tag1 #tag2             │
-│   │ Memo 正文内容...         │
-│   └─────────────────────────┘
-│
-├ ● ┌─────────────────────────┐
-│   │ 2025-03-12 09:15        │
-│   │ 另一条 Memo...           │
-│   └─────────────────────────┘
-│
-```
+1. **不用 `·` 当分隔符** — 并列信息用间距分开
+2. **不写冗余说明文字** — 界面元素能自解释就不加注释性文案
+3. **文案面向读者** — 用通用词汇，不造词；UI 文案用英文
+4. **颜色只来自 Radix Colors，并按其步骤语义使用**（见 §12.1）
+5. **光学对齐 + 同心圆角** — 用负 margin 让图标/文字而非点击区域对齐；嵌套圆角 = 外层 − 间距
+6. **边框统一 0.5px**
+7. **动效最少** — 只做颜色/透明度过渡，统一 `250ms ease-out`；面板、抽屉开合不做动画
+8. **字号最多 4 档，最小 12px**（见 §13.2）
+9. **少让用户做决定** — 不提供列表/网格切换之类的偏好开关，信息按优先级排好
+10. **少用圆角和阴影** — 不用阴影；卡片、引用、提示块**禁止彩色左边框**
 
-- 竖线：`2px solid var(--sand-5)`，通过 `.timeline::before` 伪元素实现
-- 圆点：`8px` 圆形，`sand-6`，hover 时变为 `bronze-9` 且放大 1.3x
-- 卡片：`sand-2` 背景，`sand-4` 边框，`0.625rem` 圆角
-- 日期：JetBrains Mono，`sand-9` 色
-- 标签：`grass-11` 色文字 + `sand-3` 背景
+延续的工程原则：
 
-**骨架屏加载动画**：
-
-```css
-background: linear-gradient(90deg, var(--sand-3) 25%, var(--sand-4) 50%, var(--sand-3) 75%);
-background-size: 200% 100%;
-animation: shimmer 1.5s infinite;
-```
+- **性能第一** — 纯静态、自托管字体、按需加载 Memos、CDN 部署
+- **可配置** — 单文件 `site.config.ts` 集中管理所有可变项
+- **无跟踪** — 不接入任何分析/追踪服务
+- **中文内容优化** — 阅读时间按中文计算、正文适配中文排版 (`text-autospace`、两端对齐)
 
 ---
 
@@ -883,15 +881,5 @@ pnpm deploy                 # = astro build && wrangler pages deploy dist
 ```bash
 pnpm dev                    # 启动开发服务器 (默认 http://localhost:4321)
 pnpm preview                # 预览构建产物
+node --test tests/*.mjs     # 运行单测
 ```
-
----
-
-## 20. 设计原则
-
-1. **极简至上** — 无多余装饰、无动画干扰、无 JS 框架运行时
-2. **内容优先** — 排版精心调教 (Lora 衬线体 + 1.85 行高 + 17px 字号)
-3. **性能第一** — 纯静态、字体防偏移、按需加载 Memos、CDN 部署
-4. **可配置** — 单文件 `site.config.ts` 集中管理所有可变项
-5. **无跟踪** — 不接入任何分析/追踪服务
-6. **中文优化** — 阅读时间按中文计算、UI 文案中文化、适配中文排版

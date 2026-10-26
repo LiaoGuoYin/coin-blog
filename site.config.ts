@@ -22,9 +22,9 @@ export const siteConfig = {
    * iconOnly: 仅底部小图标栏展示，不在主导航区渲染
    */
   navLinks: [
-    { href: "/post", label: "Post" },
-    { href: "/memo", label: "Memo" },
-    { href: "https://aiusage.liaoguoyin.com", label: "AIUsage", external: true },
+    { href: "/post", label: "Posts" },
+    { href: "/memo", label: "Memos" },
+    { href: "https://aiusage.liaoguoyin.com", label: "AI Usage", external: true },
     { href: "/atom.xml", label: "RSS", external: true, iconOnly: true },
     {
       href: "https://github.com/LiaoGuoYin/coin-blog",
@@ -36,33 +36,19 @@ export const siteConfig = {
 
   /** UI 文案 */
   ui: {
-    tocLabel: "本文导览",
-    prevPost: "← 上一篇",
-    nextPost: "下一篇 →",
-    backToTop: "返回顶部",
-    readingTime: (min: number) => `约 ${min} 分钟`,
-    copyButton: "复制",
-    copiedButton: "已复制",
+    tocLabel: "Contents",
+    prevPost: "Previous",
+    nextPost: "Next",
+    readingTime: (min: number) => `${min} min read`,
+    copyButton: "Copy",
+    copiedButton: "Copied",
     noPosts: "No posts yet.",
     noMemos: "No memos yet.",
-    loadMore: "查看更多",
-    loading: "加载中…",
-    noMore: "没有更多了",
-    postsHeading: "Posts",
-    allPostsHeading: "All Posts",
-    memosHeading: "Memos",
+    loadMore: "Load more",
+    loading: "Loading",
   },
 
-  /**
-   * Post 列表展示风格
-   * - 'divided'   : 分隔行列表 — 标题左、日期右，底部细线分隔，hover 背景微变
-   * - 'twoLine'   : 双行条目 — 标题一行 + 日期/阅读时间一行，靠间距区分
-   * - 'preview'   : 带摘要预览 — 标题 + 日期 + 正文前80字摘要
-   */
-  postListStyle: "twoLine" as "divided" | "twoLine" | "preview",
-
-  /** 每页显示条数 */
-  postsPerPage: 20,
+  /** 每次加载的 Memo 条数 */
   memosPerPage: 20,
 
   /** Memos API 地址(public memo only) */

@@ -1,104 +1,63 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
-import ActivityGraph from './ActivityGraph.astro';
 import { siteConfig } from '../lib/config';
-import { navIcons } from '../lib/nav-icons';
+import { navIcons, externalIcon } from '../lib/nav-icons';
+import { mainLinks, iconLinks, tabFor, isActive } from '../lib/nav';
 
 interface Props {
   currentPath?: string;
 }
 
 const { currentPath = '/' } = Astro.props;
-
-const mainLinks = siteConfig.navLinks.filter((l) => !l.iconOnly);
-const iconLinks = siteConfig.navLinks.filter((l) => l.iconOnly);
-
-function isActive(href: string): boolean {
-  if (href === '/post') {
-    return currentPath === '/' || currentPath.startsWith('/post');
-  }
-  return false;
-}
 ---
 
-<aside class="hidden lg:flex lg:flex-col lg:w-48 xl:w-56 p-3 min-h-screen scrollable-area">
+<aside class="hidden lg:flex lg:flex-col lg:w-56 shrink-0 px-4 py-6 gap-8 min-h-screen scrollable-area">
   <!-- Logo + Title + Theme Toggle -->
-  <div class="flex items-center gap-2.5 py-6 px-2">
+  <div class="flex items-center gap-3">
     <a href="/" class="shrink-0">
       <img
         src={siteConfig.avatar}
         alt={siteConfig.title}
-        class="w-10 h-10 rounded-full object-cover"
-        style="box-shadow: 0 0 0 1px rgba(0,0,0,0.08);"
+        class="w-8 h-8 rounded-full object-cover block"
       />
     </a>
-    <h1 class="text-sm font-semibold flex-1" style="color: var(--bronze-12);">
+    <span class="text-sm font-semibold flex-1" style="color: var(--text);">
       {siteConfig.title}
-    </h1>
-    <ThemeToggle />
+    </span>
+    <ThemeToggle class="-mr-2" />
   </div>
 
   <!-- Navigation -->
-  <nav class="flex flex-col gap-1 flex-1">
-    {mainLinks.map((link) => {
-      const tabName = link.href === '/post' ? 'posts' : link.href === '/memo' ? 'memos' : undefined;
-      const active = isActive(link.href);
-
-      return (
-        <a
-          href={link.href}
-          data-tab={tabName}
-          target={link.external ? '_blank' : undefined}
-          rel={link.external ? 'noopener noreferrer' : undefined}
-          class={[
-            'flex items-center gap-2 rounded-[var(--radius-md)] py-2 px-4 text-sm font-medium transition-colors duration-100',
-            active
-              ? 'sidebar-nav-active'
-              : 'sidebar-nav-inactive',
-          ].join(' ')}
-          style={`color: ${active ? 'var(--sand-12)' : 'var(--sand-11)'};`}
-        >
-          <Fragment set:html={navIcons[link.label] || ''} />
-          {link.label}
-        </a>
-      );
-    })}
+  <nav class="flex flex-col gap-0.5 flex-1">
+    {mainLinks.map((link) => (
+      <a
+        href={link.href}
+        data-tab={tabFor(link.href)}
+        target={link.external ? '_blank' : undefined}
+        rel={link.external ? 'noopener noreferrer' : undefined}
+        aria-current={isActive(link.href, currentPath) ? 'page' : undefined}
+        class="nav-item"
+      >
+        <Fragment set:html={navIcons[link.label] || ''} />
+        <span class="flex-1">{link.label}</span>
+        {link.external && <Fragment set:html={externalIcon} />}
+      </a>
+    ))}
   </nav>
 
-  <!-- Bottom area -->
-  <div class="mt-auto px-2 pt-4 pb-2 flex flex-col gap-3">
-    <!-- Activity Graph -->
-    <div>
-      <h3 class="text-xs font-medium mb-2" style="color: var(--sand-9);">Activity</h3>
-      <ActivityGraph />
-    </div>
-
-    <!-- External icon links -->
-    <div class="flex items-center gap-1">
-      {iconLinks.map((link) => (
-        <a
-          href={link.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="icon-link"
-          aria-label={link.label}
-          title={link.label}
-        >
-          <Fragment set:html={navIcons[link.label] || ''} />
-        </a>
-      ))}
-    </div>
+  <!-- External icon links -->
+  <div class="flex items-center gap-1 -ml-2">
+    {iconLinks.map((link) => (
+      <a
+        href={link.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="icon-link"
+        aria-label={link.label}
+        title={link.label}
+      >
+        <Fragment set:html={navIcons[link.label] || ''} />
+      </a>
+    ))}
   </div>
 </aside>
-
-<style>
-  .sidebar-nav-active {
-    background-color: var(--ui-bg-hover);
-  }
-  .sidebar-nav-inactive {
-    /* hover handled inline */
-  }
-  .sidebar-nav-inactive:hover {
-    background-color: var(--ui-bg-hover);
-  }
-</style>
