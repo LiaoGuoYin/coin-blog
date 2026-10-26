@@ -5,14 +5,13 @@ published: true
 feature: ''
 ---
 
-
-通过 Nginx 配置和 SSL 证书，实现半自动化获取网站 Cookie 的方法。
+记录一种用 Nginx 配置和 SSL 证书半自动获取网站 Cookie 的方法，主要用于自己调试登录态和本地脚本。
 
 <!-- more -->
 
 ## 配置说明
 
-当需要获取网站的 Cookie 时，特别是一些要求 Secure 标记的 Cookie，可以通过 Nginx 反向代理来实现。
+有些网站的 Cookie 带 Secure 标记，普通 HTTP 页面拿不到。这时候可以通过本地 Nginx 反向代理加 SSL 的方式，把浏览器请求里的 Cookie 暂时打出来。
 
 ### Nginx 配置示例
 
@@ -38,16 +37,15 @@ server {
 
 
 
-## nginx
+## Nginx
 
-Docroot is: /opt/homebrew/var/www
+Docroot 是：`/opt/homebrew/var/www`
 
-The default port has been set in /opt/homebrew/etc/nginx/nginx.conf to 8080 so that
-nginx can run without sudo.
+默认端口在 `/opt/homebrew/etc/nginx/nginx.conf` 里被设置成 8080，这样 Nginx 不需要 sudo 就能运行。
 
-nginx will load all files in /opt/homebrew/etc/nginx/servers/.
+Nginx 会加载 `/opt/homebrew/etc/nginx/servers/` 目录下的所有配置文件。
 
-To start nginx now and restart at login:
+立即启动 Nginx，并设置登录时自动启动：
   brew services start nginx
-Or, if you don't want/need a background service you can just run:
+如果不需要后台服务，也可以直接运行：
   /opt/homebrew/opt/nginx/bin/nginx -g daemon\ off\;

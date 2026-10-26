@@ -5,33 +5,30 @@ published: true
 feature: ''
 ---
 
-使用 Clang-format 工具在团队中统一 C++ 代码风格，提高代码可读性和维护性。
-
-
-在团队中，统一代码风格可以有效提高内部项目可维护性，避免低级编码错误。
+在团队里做 C++ 项目，代码风格不统一是很容易被低估的小麻烦。单看一两行没什么，项目一大，阅读、Review、合并冲突都会被它拖慢。
 
 为实现这一目标，三板斧如下：
 
 1. 确定格式化规范
 2. 选择格式化工具，编写调试配置文件
-3. 将规范集成到开发的各个流程中（编码开发，代码管理，编译打包），并跟进反馈修正
+3. 将规范集成到开发流程里，比如编码、代码管理、编译打包，再根据反馈慢慢修配置
 
 ## 1. 确定格式化规范
 
-代码格式化规范已经非常标准化。常规标准有 LLVM，Google，Webkit 等。
+代码格式化这件事已经比较标准化了，常见风格有 LLVM、Google、WebKit 等。
 
-笔者组内已有 C++ 编码规范：
+我们组内本来就有一份 C++ 编码规范：
 
 ![组内 C++ 编码规范](./assets/clang-format-team-cpp-code-style_1.png)
 
-常见的格式化规范要求涉及如下部分：
+常见规范基本会覆盖这几块：
 
 1. 命名规范
 
 - 类、结构体、枚举、联合体、类型定义、作用域名
-- 函数名(包括全局函数、作用域函数、成员函数)
-- 全局变量(包括全局和命名空间域下的变量，类静态变量)，局部变量，函数参数，类、结构体和联合体中的成员变量名
-- 宏、全局常量、枚举值、goto标签
+- 函数名，包括全局函数、作用域函数、成员函数
+- 全局变量，包括全局和命名空间域下的变量、类静态变量，以及局部变量、函数参数、类/结构体/联合体成员变量
+- 宏、全局常量、枚举值、goto 标签
 
 2. 格式规范
 
@@ -45,28 +42,28 @@ feature: ''
 
 ## 2. 选择格式化工具
 
-确定上述规范后，并不能指望团队成员能很好地应用规范。因此，需要选择格式化工具，通过介入开发的各个阶段，潜移默化地辅以开发者遵守规范。
+规范定下来之后，不能指望每个人都靠记忆和自觉稳定执行。更现实的做法是选一个格式化工具，把它放到开发流程里，让工具帮大家兜住这部分细节。
 
-CPP 常见的格式化工具有 [cpplint](https://github.com/cpplint/cpplint)，[clang-format](https://clang.llvm.org/docs/ClangFormat.html)，[clang-tidy](https://clang.llvm.org/extra/clang-tidy/index.html) 等：
+C++ 常见的格式化/检查工具有 [cpplint](https://github.com/cpplint/cpplint)、[clang-format](https://clang.llvm.org/docs/ClangFormat.html)、[clang-tidy](https://clang.llvm.org/extra/clang-tidy/index.html) 等：
 
-- cpplint 是格式化工具，主要围绕 Google 规范展开，现已不再维护公开仓库
-- clang-tidy 是静态代码分析工具，可以实现[变量名风格纠正替换](https://clang.llvm.org/extra/clang-tidy/checks/list.html)
-- clang-format 是格式化工具，调整空格换行符等格式规范
+- cpplint 主要围绕 Google 规范展开，公开仓库现在基本不维护了。
+- clang-tidy 是静态代码分析工具，可以做[变量名风格纠正替换](https://clang.llvm.org/extra/clang-tidy/checks/list.html)。
+- clang-format 是格式化工具，主要调整空格、换行、缩进这类格式。
 
-经过初步调研后，发现 [clang-format 基本能满足所有需求（格式规范和注释规范），命名规范方面则可以结合 clang-tidy 可为补充](https://stackoverflow.com/questions/73788989/how-to-configure-naming-conventions-with-clang-format)：
+初步调研下来，[clang-format 基本能满足格式规范和注释规范，命名规范则可以用 clang-tidy 补一部分](https://stackoverflow.com/questions/73788989/how-to-configure-naming-conventions-with-clang-format)：
 
 > Clang-format is all about local changes to the code in a way that is irrelevant to the compiler. Like changing whitespace. Renaming variables, on the other hand, is a completely different thing, since its impact is potentially very global (think about exported symbols consumed by other libraries, or just multiple files).
 
-下文是笔者集成 Clang-format 的一点实践经验。
+下面记录一点集成 Clang-format 的实践经验。
 
 ## 3. 编写 .clang-format
 
-引入 Clang-format 需要编写 .clang-format 配置文件，通过配置文件的形式调用的好处很多：无论是在命令行脚本中或是 IDE 中或是 CICD 流程，都能很方便地集成同一套规范。
+引入 Clang-format 需要写 `.clang-format` 配置文件。配置文件的好处是很明显的：命令行脚本、IDE、CI/CD 都能复用同一套规范。
 
-[Clang-format 支持的配置参数很多](https://clang.llvm.org/docs/ClangFormatStyleOptions.html)，为提高编写配置文件效率，[可以使用在线 .clang-format 配置预览网站](https://clang-format-configurator.site/)，修改后实时预览格式:
+[Clang-format 支持的配置参数很多](https://clang.llvm.org/docs/ClangFormatStyleOptions.html)。为了少一点盲调，可以用这个[在线 .clang-format 配置预览网站](https://clang-format-configurator.site/)，改完能实时看格式效果：
 ![image-20250412223702866](./assets/clang-format-team-cpp-code-style_2.png)
 
-经过 GPT 辅助+文档查询+网站在线调试后，初版格式化配置文件如下：
+GPT 辅助、文档查询、网站在线调试之后，初版配置大概长这样：
 
 ```YAML
 # .clang-format 配置文件, 根据指定的编码规则生成
@@ -147,22 +144,22 @@ AllowShortFunctionsOnASingleLine: None
 ColumnLimit: 200
 ```
 
-在确定了规范和工具后，可以在命令行中快速格式化单个 cpp 代码：
+规范和工具都确定后，就可以在命令行里快速格式化单个 C++ 文件：
 `clang-format -style=file -i src/path/to/*.cpp`
 
-> clang-format -style=file 应用配置文件时会遵循就近原则，在执行目录最近的父级目录中找寻 .clang-format 配置。找不到则使用默认的规则格式化兜底
+> `clang-format -style=file` 应用配置文件时会遵循就近原则，从执行目录最近的父级目录里找 `.clang-format`。找不到时，再用默认规则兜底。
 > [When using -style=file, clang-format for each input file will try to find the .clang-format file located in the closest parent directory of the input file. When the standard input is used, the search is started from the current directory.](https://clang.llvm.org/docs/ClangFormatStyleOptions.html)
 
-批量格式化也十分简单。将多个 cpp 文件传入给 clang-format 即可，这个过程需要借助 Shell 中的 **通配符** 或 **find 指令+管道**，以脚本的形式运行：
+批量格式化也很直接，把多个 C++ 文件传给 clang-format 即可。这里可以借助 Shell 的 **通配符**，或者用 **find 指令 + 管道** 写成脚本：
 
 - `find . -name '*.cpp' -o -name '*.h' | xargs clang-format -i`
 - `clang-format -i **/*.{cpp,h,hpp}`
 
 ## 4. 集成策略
 
-有了规则和工具，接下来考虑的是如何把规范应用到小组内部项目中，实现长期规范。
+有了规则和工具，接下来要想的是怎么把它放进小组项目里，并且长期跑下去。
 
-如下图，在开发的各个流程中（编码开发，代码管理，编译打包），都可以集成格式化。
+如下图，编码开发、代码管理、编译打包这些阶段，都可以插入格式化。
 
 - Coding（vscode，qt creator format on saving）
 - Before git push（Git Hook： ~/.git/hooks）
@@ -170,37 +167,37 @@ ColumnLimit: 200
 
 ![代码格式化阶段](./assets/clang-format-team-cpp-code-style_3.png)
 
-具体在哪个阶段引入，可以从侵入性、可复用性、能否提供反馈纠正等方面进行考虑。
+具体放在哪个阶段，可以从侵入性、可复用性、反馈是否及时几个角度看。
 
-- Coding 阶段引入需要引导开发者为 IDE 配置额外的工具，前期有一定侵入性，但配置独立于项目，每次格式化会给予开发者正反馈学习；
-- 本地 Git 阶段引入也有侵入性，需要编写脚本配置项目粒度的 ~/.git/hooks，相比于第一阶段可复用性更差。每个项目都要配脚本、新增 git hooks 操作；
-- CICD pipeline 阶段对开发者是无感、或者说是被动的，可迁移性也更好，开发和格式化完全分离。这里重点描述 CI 阶段。CI 有两种策略：
-  1. 一种是推送后执行 format，直接让 CI 将 format 之后的代码推送到仓库，这种策略对开发者感知很弱，几乎不会让开发者对代码规范引起重视，且对代码及具侵略性，缺乏人工 review 的过程可能导致危险；
-  2. 另一种是在 CI 中执行 format 后，检查 git diff，如果 git 存在差异，则拒绝代码推送及 PR合并，让用户修改后再推送再合并。
+- Coding 阶段需要引导开发者给 IDE 配额外工具，前期有一点侵入性，但反馈很快，保存时就能看到结果。
+- 本地 Git 阶段也有侵入性，需要为项目配置 `~/.git/hooks`。它比 IDE 方案可复用性差，每个项目都要配脚本、加 hooks。
+- CI/CD pipeline 阶段对开发者更无感，也更容易迁移，开发和格式化流程可以分开。CI 里一般有两种策略：
+  1. 推送后执行 format，再让 CI 把格式化后的代码推回仓库。这种策略对开发者感知很弱，也不太能让大家重视规范；更麻烦的是，它会直接改代码，缺少人工 Review 时风险比较高。
+  2. 在 CI 中执行 format 后检查 git diff。如果存在差异，就拒绝代码推送或 PR 合并，让开发者本地修完再推。
 
 好的工具应该是无感的，是辅助、加成而不是给开发者以限制。
 
-因此，一个不错的引入原则是 **多阶段结合，相互补充，逐步平滑引入**：
+所以我比较倾向的原则是：**多阶段结合，相互补充，逐步平滑引入**。
 
-在 Coding 阶段引入，并不断修正配置文件；等到配置成熟后，然后在 CI/CD 流水线中引入，增量检查变更代码，并按照策略2进行自自动化审查（没有格式化的代码无法被合并）。
+先在 Coding 阶段引入，一边用一边修 `.clang-format`；配置成熟后，再放进 CI/CD 流水线，增量检查变更代码，并按照策略 2 做自动化审查。没有格式化的代码不能合并。
 
-至于第二个阶段，hooks 无法被同步到 Git 仓库，要求开发者需要在开发环境进行额外的配置，且可迁移性较差，暂时不予忽略，在后续有需要时再考虑引入。
+至于本地 hooks，它没法被 Git 仓库直接同步，还要求开发者在本地额外配置，可迁移性比较差，暂时先忽略，后面有需要再补。
 
 ### 4.1 集成到开发阶段
 
-在开发时介入，这部分主要是在统一在开发者处安装 IDE 插件，实现保存文件时自动调用 Clang-format，这个后续会再写水一篇文章。
+在开发阶段介入，主要是统一给开发者安装 IDE 插件，让保存文件时自动调用 Clang-format。这部分后面可以再单独水一篇。
 
 值得一提的是，[Clang-format 程序版本应该保持一致性](https://askubuntu.com/questions/1409031/how-to-use-a-more-recent-clang-format-or-clang-tidy-version-on-ubuntu-18-04)。
 
-笔者在实践时发现，组内有同事配置了 Clang-format 但依旧格式化不通过标准化结果。
+实践时我遇到过一个坑：组内有同事明明配置了 Clang-format，但格式化结果还是和标准不一致。
 
-最后发现是开发环境的锅，如 Ubuntu 22 和 Ubuntu 24 通过 apt 安装的 Clang-format 版本并不相同，不同的 Clang-format 版本之间加入了新的格式化规则，版本之间默认的配置参数并不完全兼容。
+最后发现是开发环境的锅。比如 Ubuntu 22 和 Ubuntu 24 通过 apt 安装的 Clang-format 版本并不相同，不同版本之间会加入新的格式化规则，默认配置参数也不完全兼容。
 
-**因此需要开发团队安装同一个版本的 Clang-format，可以选择编译安装，也可以使用 Python pip 安装。**
+**所以团队最好统一 Clang-format 版本。可以编译安装，也可以用 Python pip 安装。**
 
 ### 4.2 集成到 CI 流程
 
-在开发者推送代码到代码仓库后，可以在编译前进行格式化。这条链路的核心是：在 PR 合并代码阶段，利用 [git diff](https://git-scm.com/docs/git-diffyesterday) 对比格式化前后的代码，接受或拒绝更新。
+开发者把代码推到仓库后，可以在编译前跑一次格式化检查。这条链路的核心是：在 PR 合并阶段，利用 [git diff](https://git-scm.com/docs/git-diff) 对比格式化前后的代码，再决定接受还是拒绝更新。
 
 ```
 #!/bin/bash
@@ -273,16 +270,16 @@ test-clang-format:
 
 ## 5. 总结
 
-以上就是笔者在 cpp 项目中集成 Clang-format 的一点经验。
+以上就是我在 C++ 项目里集成 Clang-format 的一点经验。
 
-本文介绍了 Clang-format，.clang-format 配置文件编写的过程，以及将其集成到开发过程中哪个阶段的思考：
+这篇文章主要记录了 Clang-format、`.clang-format` 配置文件怎么写，以及它应该放到开发流程里的哪个阶段：
 
-- 目前个人的答案是将它集成到代码开头（开发阶段）和代码结束（代码 CI 编译前）
-- 现在，借助 GPT 编写这类工具的配置文件是件简单得不能再简单的事情，如何更无感地把它集成到团队中，尽可能不影响开发体验和习惯才是更值得琢磨的
+- 目前我的答案是放在代码开头，也就是开发阶段；再放在代码结束，也就是 CI 编译前。
+- 现在借助 GPT 写这类工具配置已经很简单了，更值得琢磨的是怎么把它无感地集成到团队里，尽量不影响开发体验和既有习惯。
 
-此外，规则内容本身没有好坏之分。举例来说，细抠犹豫 CPP 指针符应该放在变量和类型的左边、右边还是中间，真没多少意义。
+此外，规则内容本身没有绝对好坏。比如细抠 C++ 指针符应该靠变量、靠类型，还是放中间，其实没多少意义。
 
-毕竟，保持一致性才是做这件事的核心。
+保持一致性，才是做这件事的核心。
 
 ## 6. Ref
 

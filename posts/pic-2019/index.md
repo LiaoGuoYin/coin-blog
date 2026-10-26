@@ -5,11 +5,11 @@ published: true
 feature: './assets/pic-2019_0.jpg'
 ---
 
-用照片回忆 2019
+用照片回忆 2019。
 
 <!-- more -->
 
-# 在学校:
+# 在学校
 
 ![海边小楼梯](./assets/pic-2019_1.jpg) ![路标](./assets/pic-2019_2.jpg)
 
@@ -39,9 +39,9 @@ feature: './assets/pic-2019_0.jpg'
 
 ![家里也要通勤](./assets/pic-2019_23.jpg) ![家那边的大厦](./assets/pic-2019_24.jpg)
 
-# 在日本:
+# 在日本
 
-(也是在 2019，但是这趟旅程满意的照片有点多就特别拿出来了 233
+也是在 2019，但是这趟旅程满意的照片有点多，就单独拿出来了 233。
 
 ![temple1](./assets/pic-2019_25.jpg) ![temple2](./assets/pic-2019_26.jpg)
 
@@ -63,5 +63,4 @@ feature: './assets/pic-2019_0.jpg'
 
 ![Fuji4](./assets/pic-2019_40.jpg)
 
-不知道 2020 的相册集看起来是什么样子
-期待一下 XD
+不知道 2020 的相册集会是什么样子，期待一下 XD。

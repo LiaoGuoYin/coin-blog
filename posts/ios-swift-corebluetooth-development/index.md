@@ -5,32 +5,32 @@ published: true
 feature: './assets/ios-swift-corebluetooth-development_0.jpg'
 ---
 
-基于 iOS CoreBluetooth 框架的蓝牙开发实践，从 BLE 基础到实际开发经验分享。
+记录一次 iOS CoreBluetooth 蓝牙开发实践，从 BLE 基础概念到实际踩坑经验。
 
 <!-- more -->
 
-因为一点机缘巧合，看了一下 iOS [CoreBluetooth 文档](https://developer.apple.com/bluetooth/)，做了一个和 [蓝牙交互传数据的 App](https://github.com/LiaoGuoYin/Bluetooth-iOS)
+因为一点机缘巧合，看了一下 iOS [CoreBluetooth 文档](https://developer.apple.com/bluetooth/)，顺手做了一个和[蓝牙交互传数据的 App](https://github.com/LiaoGuoYin/Bluetooth-iOS)。
 
-网上关于 iOS Swift 蓝牙开发的资料很少，遇到问题一度非常苦恼，好在最后把一点东西最基本的啃过来了，这里结合自己的一丁点儿开发经验方便以后查阅，也希望能给看到这里的朋友一点帮助。
+网上关于 iOS Swift 蓝牙开发的资料不算多，遇到问题时一度很苦恼。好在最后还是把最基础的一点东西啃过来了，这里结合自己的一丁点儿开发经验做个记录，方便以后查阅，也希望能给看到这里的朋友一点帮助。
 
 ## CoreBlueTooth 蓝牙基础
 
-低功耗蓝牙 Bluetooth Low Energy (BLE) 指蓝牙 4.0，特色是 **小数据、低功耗**，而在蓝牙4.0 以前是经典蓝牙，[iOS Core Bluetooth 基于 Bluetooth 4.0 协议 ](https://developer.apple.com/library/archive/documentation/NetworkingInternetWeb/Conceptual/CoreBluetooth_concepts/AboutCoreBluetooth/Introduction.html#//apple_ref/doc/uid/TP40013257)，兼容 iPhone 4S+ 的机器。
+低功耗蓝牙 Bluetooth Low Energy（BLE）指蓝牙 4.0，特色是 **小数据、低功耗**。蓝牙 4.0 以前则是经典蓝牙。[iOS Core Bluetooth 基于 Bluetooth 4.0 协议](https://developer.apple.com/library/archive/documentation/NetworkingInternetWeb/Conceptual/CoreBluetooth_concepts/AboutCoreBluetooth/Introduction.html#//apple_ref/doc/uid/TP40013257)，兼容 iPhone 4S+ 的机器。
 
 一些 iOS 蓝牙开发基本概念：
 
 - Central: 中心设备，可以理解为对外扫描蓝牙的设备，一般指本机
 - Peripheral: 外围设备，可以理解为蓝牙外部硬件设备
 - Services: 服务，可以理解为蓝牙低功耗硬件设备所提供的 **多个功能集合**
-- Chracteristics: 特征，一个特征对应了 **一个功能**
+- Characteristics: 特征，一个特征对应 **一个功能**
 
-Charateristics 的功能一般由以下三种能力组合而成：
+Characteristics 的功能一般由下面三种能力组合而成：
 
 1. Read: 读，表示设备为这个特征设置，可以被其他设备读取
 2. Write: 写，表示设备可以被写入数据
-3. Notify: 订阅/通知，该特诊对应的值可以被其他设备订阅，一旦本机对该值进行修改，就会把修改结果通知给订阅端
+3. Notify: 订阅/通知，该特征对应的值可以被其他设备订阅，一旦本机对该值进行修改，就会把修改结果通知给订阅端
 
-一图胜千言，用 `Bluetility` 这个工具能很好的帮助理解蓝牙的基本概念。
+一图胜千言，用 `Bluetility` 这个工具能很好地帮助理解蓝牙基本概念。
 
 ![Bluetility-macOS App](./assets/ios-swift-corebluetooth-development_1.jpg)
 
@@ -38,19 +38,19 @@ Charateristics 的功能一般由以下三种能力组合而成：
 
 中心设备 C: Central, 外围设备 P: Peripheral
 
-蓝牙连接的主要代码逻辑如下：
+蓝牙连接的主要代码逻辑大概如下：
 
 1. 创建并开启中心设备 C
 2. 开始 **扫描** 广播，寻找外围设备 P
-3. 中心设备 C 扫描到外围设备 P 发出的广播后。回调用中心设备 C 的代理方法，来连接外围设备 P
-4. **连接** 到外围设备 P 后。回调中心设备 C 的代理方法，来搜寻此外围设备 P 提供的服务
-5. 通过 UUID 的比对找到合适的服务后。回调中心设备 C 的代理方法，来搜寻该服务下所有的特征
-6. 找到合适的特征后。回调中心设备 C。的代理方法，通过 UUID、特征属性等筛选找到目标特征
-7. 找到合适的写、读特征后。**手动调用中心设备 C 的方法对对应的特征进行订阅、写、读**，实现和外部设备 P 的数据收发读功能
+3. 中心设备 C 扫描到外围设备 P 发出的广播后，回调中心设备 C 的代理方法，连接外围设备 P
+4. **连接** 到外围设备 P 后，回调中心设备 C 的代理方法，搜索此外围设备 P 提供的服务
+5. 通过 UUID 比对找到合适的服务后，回调中心设备 C 的代理方法，搜索该服务下所有特征
+6. 找到合适特征后，继续回调中心设备 C 的代理方法，通过 UUID、特征属性等筛选目标特征
+7. 找到合适的写、读特征后，**手动调用中心设备 C 的方法对对应特征进行订阅、写、读**，实现和外部设备 P 的数据收发
 
 ## Demo Practice
 
-2019 WWDC 上放出了一个经典蓝牙开发的 [Demo](https://developer.apple.com/documentation/corebluetooth/using_core_bluetooth_classic)，对着代码学习就完事了
+2019 WWDC 上放出了一个经典蓝牙开发 [Demo](https://developer.apple.com/documentation/corebluetooth/using_core_bluetooth_classic)，对着代码学就完事了。
 
 1. 新建工程
 2. 添加 Info.plist 确保用户能授权蓝牙权限
@@ -64,11 +64,11 @@ Charateristics 的功能一般由以下三种能力组合而成：
 
 ## 可能遇到的问题
 
-个人在写项目过程中遇到过三个问题：**数据分包收发问题、编码解码问题、显示数据换行符的问题**
+我在写项目时主要遇到三个问题：**数据分包收发、编码解码、显示数据换行符。**
 
 ### 编码解码问题
 
-在本项目中，App 和蓝牙交互的是文本字符串。可以确定的是，我们收发的文本数据发送之前都会被序列化（也可理解为编码）为二进制字节流，真正传输的数据都是字节流。而把一段文本序列化编码为怎样的二进制的字节流就有讲究了。
+在本项目中，App 和蓝牙交互的是文本字符串。可以确定的是，文本数据在发送前都会被序列化，也可以理解为编码成二进制字节流。真正传输的数据都是字节流，而一段文本应该被编码成什么样的字节流，就有讲究了。
 
 从 '字符串' 到 二进制，前人已经给出了多种编码方式：从最开始的 ASCII，到 GBK，再到后来的 Unicode，都是编码解码的解决方案，每一种编码都对应了一定的规则，可能是变长编码、可能编码码元不一致等。所以，需要注意的是，什么编码就用什么解码。否则就会出现字符集不一致导致的乱码问题。
 
@@ -88,7 +88,7 @@ if let tmpString = String(data: actualData, encoding: String.Encoding(rawValue: 
 
 ### 分包问题
 
-因为蓝牙的低功耗的特色，蓝牙收发数据是有长度限制的。大数据需要被拆分为小数据，才能保证数据能被正常完整地接受。其实下面的解决思路有点处理 TCP 上层应用层的拆包、粘包问题的那味道了。
+因为蓝牙低功耗的特性，蓝牙收发数据有长度限制。大数据需要拆成小数据，才能保证被正常、完整地接收。下面这个解决思路，有点像处理 TCP 上层应用层的拆包、粘包问题。
 
 假设 C 是中心设备，P 是外部硬件蓝牙设备
 
@@ -111,7 +111,7 @@ if let tmpString = String(data: actualData, encoding: String.Encoding(rawValue: 
 |  Classic macOS  |     \r     |                0x0D                | Carriage return |
 |   Windows/DOS   |    \r\n    |              0x0D 0x0A              |      CRLF      |
 
-注: 在 [Swift String](https://developer.apple.com/documentation/swift/1541053-print) 中，默认的换行符是 newline(\n)。而要想在 Windows 的串口程序（XCOM for Windows）控制栏上显示正确地换行，需要在发送数据中每一行结尾处手动加上 `\r`
+注：在 [Swift String](https://developer.apple.com/documentation/swift/1541053-print) 中，默认换行符是 newline（`\n`）。而要想在 Windows 串口程序（XCOM for Windows）控制栏上正确换行，需要在发送数据每一行结尾手动加上 `\r`。
 
 在 ASCII 中，回车和换行是不同的字符。0x0A 是回车，即光标移动到本行的最左面；0x0D 是换行，即光标移动到下一行。
 

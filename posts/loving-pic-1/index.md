@@ -5,6 +5,8 @@ published: true
 feature: ''
 ---
 
+一点喜欢的照片，存个档。
+
 <!-- more -->
 
 ![](./assets/loving-pic-1_1.jpg) ![](./assets/loving-pic-1_2.jpg)

@@ -7,9 +7,9 @@ feature: './assets/hadoop-fully-distributed-cluster-setup_0.jpg'
 
 别问，问就是繁琐。
 
-对自己的记忆力不太放心，也算是对近期实践的一个回顾，记录一下完全分布式 Hadoop 生态组件的基本搭建流程。
+对自己的记忆力不太放心，也算是对近期实践做个回顾，记录一下完全分布式 Hadoop 生态组件的基本搭建流程。
 
-实质上，集群搭建只是繁琐，你只要熟悉一些基本的 Linux 命令，再简单理解一下集群架构就能很快上手，再把手翻过来，就会了。
+实质上，集群搭建只是繁琐。只要熟悉一些基本 Linux 命令，再简单理解集群架构，就能很快上手。再把手翻过来，就会了。
 
 所以严格来说，这应该算是一次 Linux 基本命令训练。
 
@@ -49,7 +49,7 @@ feature: './assets/hadoop-fully-distributed-cluster-setup_0.jpg'
 
 ## 准备工作
 
-搭建集群前，为方便集群的启动和文件传递，主要要确保以下配置：
+搭建集群前，为了方便集群启动和文件传递，主要要先确认下面几件事：
 - 内网组建
 - 免密登录
 - 环境变量
@@ -66,7 +66,7 @@ feature: './assets/hadoop-fully-distributed-cluster-setup_0.jpg'
 
 #### 编辑内网别名
 
-为了方便集群间通信，设置了主机别名
+为了方便集群间通信，设置主机别名。
 
 查询内网 IP `ifconfig`
 
@@ -112,7 +112,7 @@ EOF
 
 ## 2. Hadoop
 
-`cat > output.log << EOF` 是 [heredoc 语法](https://stackoverflow.com/questions/2500436/how-does-cat-eof-work-in-bash)，可以多行追加\覆盖写内容到文件，简洁易用
+`cat > output.log << EOF` 是 [heredoc 语法](https://stackoverflow.com/questions/2500436/how-does-cat-eof-work-in-bash)，可以多行追加/覆盖写内容到文件，简洁易用。
 
 ### 配置文件
 
@@ -249,11 +249,11 @@ EOF
 
 ### 其他
 
-启动节点: `start-dfs.sh `、`start-yarn.sh`
+启动节点：`start-dfs.sh `、`start-yarn.sh`
 
-检测节点状态: `hdfs dfsadmin -report`
+检测节点状态：`hdfs dfsadmin -report`
 
-刷新节点状态: `hdfs dfsadmin -refreshNodes`
+刷新节点状态：`hdfs dfsadmin -refreshNodes`
 
 ## 4. Zookeeper
 
@@ -261,11 +261,11 @@ EOF
 
 ## 5. MySQL
 
-MySQL 简单的外表下藏露着凶恶，是我们练习过程中踩坑踩得最多的地方，主要原因是 MySQL 的版本之间差异很大，做同一件事情的命令可能因为版本区别而存在差异，所以建议 Google 过程中带上 MySQL 版本号。
+MySQL 简单的外表下藏着凶恶，是练习过程中踩坑最多的地方。主要原因是 MySQL 版本差异很大，同一件事的命令可能因为版本不同而不一样，所以建议 Google 时带上 MySQL 版本号。
 
 ### 安装
 
-### 通过第三方包管理器安装(RPM, Yum)
+### 通过第三方包管理器安装（RPM, Yum）
 
 https://dev.mysql.com/doc/refman/5.7/en/linux-installation-yum-repo.html
 
@@ -323,7 +323,7 @@ https://dev.mysql.com/downloads/repo/yum
 
 ## 6. Hive
 
-[Hive 是为了解决 Hadoop 中 Mapreduce 编写困难，提供给熟悉 SQL 的人使用的。只要你对 SQL 有一定的了解，就能通过 Hive 写出 Mapreduce 的程序，而不需要去学习 Hadoop 中的 Java API](https://www.cnblogs.com/xing901022/p/5775954.html)
+[Hive 是为了解决 Hadoop 中 MapReduce 编写困难，提供给熟悉 SQL 的人使用的。只要你对 SQL 有一定了解，就能通过 Hive 写出 MapReduce 程序，而不需要去学习 Hadoop 中的 Java API](https://www.cnblogs.com/xing901022/p/5775954.html)
 
 ### 配置运行时环境
 
@@ -342,9 +342,9 @@ https://dev.mysql.com/downloads/repo/yum
 
 ### 配置节点文件
 
-master 和 slaves 节点的配置文件不完全相同，这是因为各个节点所承担的角色，完成的任务不同所导致的，
+master 和 slaves 节点的配置文件不完全相同，因为各个节点承担的角色和完成的任务不同。
 
-在完全分布式模式中，Hive 分为 Server\Client
+在完全分布式模式中，Hive 分为 Server/Client。
 
 任务分工：
 
@@ -438,7 +438,7 @@ master 和 slaves 节点的配置文件不完全相同，这是因为各个节�
 
 http://www.hadooplessons.info/2017/12/log-files-in-hadoop-eco-system.html
 
-查报错、[对文档](https://www.iteblog.com/archives/896.html)是最基本的操作，这个少不了
+查报错、[对文档](https://www.iteblog.com/archives/896.html)是最基本的操作，这个少不了。
 
 ### 日志
 
@@ -447,27 +447,27 @@ Logs 文件常见类型有：
 - *.out 记录了**启动**后台进程过程中遇到的失败消息
 - *.log 记录了**运行**后台进程的过程中的错误信息，一般查询时要用 tail -f 实时捕获
 
-下面是组件**默认日志文件的位置、及日志文件所在的配置文件**位置:
+下面是组件**默认日志文件的位置，以及日志文件所在的配置文件**位置：
 
 Hadoop：
 
-- 配置文件: $HADOOP_HOME/etc/hadoop/hadoop-env.sh
-- 默认日志位置: $HADOOP_HOME/logs
+- 配置文件：$HADOOP_HOME/etc/hadoop/hadoop-env.sh
+- 默认日志位置：$HADOOP_HOME/logs
 
 Zookeeper：
 
-- 配置文件: $ZOOKEEPER_HOME/conf/log4j.properties
-- 默认日志位置: $ZOOKEEPER_HOME/logs
+- 配置文件：$ZOOKEEPER_HOME/conf/log4j.properties
+- 默认日志位置：$ZOOKEEPER_HOME/logs
 
 Hive:
 
-- 配置文件:  $HIVE_HOME/conf/hive-log4j.properties
-- 默认日志位置: /tmp/<*user.name*>/hive.log
+- 配置文件：$HIVE_HOME/conf/hive-log4j.properties
+- 默认日志位置：/tmp/<*user.name*>/hive.log
 
 MySQL:
 
-- 配置文件: /etc/my.cnf
-- 默认日志位置: /var/log/mysqld.log
+- 配置文件：/etc/my.cnf
+- 默认日志位置：/var/log/mysqld.log
 
 ### 文档
 

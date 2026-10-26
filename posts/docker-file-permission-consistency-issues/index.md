@@ -5,11 +5,11 @@ published: true
 feature: ''
 ---
 
-最近频繁使用 docker-compose，发现在容器迁移、备份和使用方面非常便利。
+最近频繁用 docker-compose，越来越觉得它在容器迁移、备份和日常管理上确实方便。
 
-容器的启停只需要 `docker-compose up` 和 `docker-compose down`，大大降低了心智负担。
+容器启停基本就是 `docker-compose up` 和 `docker-compose down`，心智负担小很多。
 
-但是在一次使用 `docker-compose up` 启动（创建）以下容器时，遇到了创建文件 ./data/config.json 失败的问题。
+但有一次用 `docker-compose up` 启动下面这个容器时，遇到了 `./data/config.json` 创建失败的问题。
 
 ```
 # https://hub.docker.com/r/shellngn/pro/
@@ -27,7 +27,7 @@ services:
     restart: unless-stopped
 ```
 
-通过 `docker logs shellngn` 查看日志，发现是挂载本地目录 ./data 到容器后，容器在创建文件时报错：
+用 `docker logs shellngn` 看日志，发现是把本地 `./data` 挂到容器后，容器创建文件时报了权限错误：
 
 ```
 shellngn is up-to-date
@@ -56,18 +56,18 @@ shellngn    | Node.js v18.20.1
 
 ```
 
-查阅资料后发现，这个问题通常是 **Docker 容器内外的操作用户权限不匹配** 导致的：
+查了一圈资料后，基本能确定是 **Docker 容器内外的操作用户权限不匹配** 导致的：
 
-- 当使用 `docker-compose up` 创建文件夹时，这些文件夹通常是由容器内部的进程创建的。容器内部的进程可能以 root 用户或其他特定用户身份运行，而这个用户的 UID（用户 ID）可能与宿主机系统上的用户权限不匹配，这就导致了权限错误
-- 相比之下，如果使用 Docker Volume 就不会有文件权限的问题。因为 Docker 守护进程创建文件夹时，它通常能够正确处理权限问题
+- 使用 `docker-compose up` 创建挂载目录时，文件夹可能是容器内部进程创建的。容器里的进程可能以 root 或某个指定用户运行，这个用户的 UID（用户 ID）和宿主机上的用户对不上，就容易出权限问题。
+- 如果改用 Docker Volume，权限问题通常会少很多。因为目录交给 Docker 守护进程管理，很多映射细节它会自己处理掉。
 
 ## 解决方法
 
-解决方法其实非常简单：限制、同步权限
+解决方法其实不复杂：要么把运行用户对齐，要么把目录交给 Docker 管。
 
 ### 方法一：使用 user 指令
 
-在 docker-compose.yml 文件中，指定容器以哪个用户/用户组运行：**user: "${UID}:${GID}"**
+在 `docker-compose.yml` 里指定容器用哪个用户/用户组运行，也就是 **user: "${UID}:${GID}"**。
 
 ```
 ...省略...
@@ -83,7 +83,7 @@ services:
 
 ### 方法二：使用 Docker Volumes
 
-使用 Docker Volumes 让 Docker 服务自动完成权限管理（但 volumes 迁移不是很方便，用起来不如文件夹挂载灵活）
+使用 Docker Volumes，让 Docker 自己处理权限管理。缺点也很明显，Volume 迁移不如文件夹挂载直观，用起来没那么灵活。
 
 ```
 ...省略...
@@ -100,45 +100,45 @@ volumes:
 
 ## 排查问题
 
-问题解决后，很疑惑 **Docker 容器内外的操作用户权限不匹配** 背后到底是什么不匹配。问题出现后，进行了如下排查：
+问题解决后，我还是有点疑惑：**Docker 容器内外的操作用户权限不匹配**，背后到底是哪一层不匹配？于是又继续排了一下。
 
-- 查看文件夹用户组和权限，发现容器新建出来的文件所属用户及用户组是 1000:1000
-- 为了查看容器的操作用户，查看了容器镜像配置 `docker inspect shellngn`
+- 查看文件夹的用户组和权限，发现容器新建出来的文件所属用户和用户组是 `1000:1000`。
+- 为了确认容器实际用什么用户，查看了容器镜像配置 `docker inspect shellngn`。
 
-  发现 ID 1000 用户在容器内对应着 node 用户
+  这里能看到，ID 1000 在容器内对应的是 `node` 用户。
 
   ![image-20241010010359365](./assets/docker-file-permission-consistency-issues_1.png)
-- 在宿主机和容器中命令行中输入 id 查看默认用户，发现 ID 默认运行用户都是 0 号用户（root 用户）
+- 在宿主机和容器里分别执行 `id` 查看默认用户，发现默认运行用户都是 0 号用户，也就是 root。
 
-  - 宿主机中 /etc/passwd 文件里没有 1000 用户
+  - 宿主机的 `/etc/passwd` 文件里没有 1000 用户。
 
     ![image-20241010010707953](./assets/docker-file-permission-consistency-issues_2.png)
-  - 容器中 /etc/passwd 中有 1000 用户，且就是上文的 node 用户
+  - 容器的 `/etc/passwd` 里有 1000 用户，就是上面的 `node` 用户。
 
     ![image-20241010010218935](./assets/docker-file-permission-consistency-issues_3.png)
-  - 尝试在宿主机新建 ID 为 1000 的用户：`useradd -u 1000 coincoin`
-  - 再执行没有传入 user 的 docker-compose.yaml 新建成功，且所属文件是宿主机 ID 1000 的用户（刚创建的用户 coincoin）
+  - 尝试在宿主机新建一个 ID 为 1000 的用户：`useradd -u 1000 coincoin`。
+  - 再执行没有传入 `user` 的 `docker-compose.yaml`，文件就能正常创建了，而且文件归属变成了宿主机上 ID 1000 的用户，也就是刚创建的 `coincoin`。
 
     ![image-20241010010556788](./assets/docker-file-permission-consistency-issues_4.png)
 
-    **在容器中：文件夹的权限在容器内外所属于的用户/用户组可能不一致，文件其实属于各自域内的对应 ID 的用户，认 ID 而不认用户名。上文最开始遇到的问题中，这些文件属于 ID 1000 的用户，但在宿主机中不存在这个 ID 的用户，因此报错。**
-- 此外，通过 `docker history shellngn` 查看镜像层发现：容器镜像默认用户在创建文件夹之前就被切换为了 node（USER node）
+    **结论是：文件权限认 UID/GID，不认用户名。容器里和宿主机里同一个 ID 可以对应不同用户，也可能宿主机压根没有这个 ID。最开始的问题里，文件属于 ID 1000，但宿主机没有这个用户，所以文件操作就炸了。**
+- 此外，通过 `docker history shellngn` 查看镜像层，发现容器镜像默认用户在创建文件夹之前就已经被切换成了 `node`（USER node）。
 
   `<missing>      2 months ago    /bin/sh -c #(nop)  USER node                    0B`
 
   ![image-20241204000404832](./assets/docker-file-permission-consistency-issues_5.png)
 
-  至此真相大白，容器在创建文件夹时创建的用户在映射到外部时无法根据内部的用户 ID 找到对应的用户，导致文件操作没有权限。
+  到这里基本真相大白：容器创建文件时用的是内部的 `node` 用户，映射到宿主机后只能看到 UID 1000。宿主机没法把这个 UID 对应到有效用户，最后就变成了权限问题。
 
-在容器中，这种切换操作用户是一种安全手段，通过切换到非特权用户来运行应用程序，减少潜在的安全风险。Node.js 官方镜像就经常使用这个做法。但这可能会导致上文这样的潜在权限问题。
+容器里切换运行用户本来是安全手段，用非特权用户跑应用，能减少一些潜在风险。Node.js 官方镜像也经常这么做。只是目录挂载到宿主机以后，这套机制就可能带来上面这种权限坑。
 
 ## 总结
 
-总的来说，**Docker 容器内外的操作用户权限不匹配** 是指在运行容器时，内外操作的用户不一致，导致的文件夹权限归属无法确认。因此：
+这次踩坑之后，后面再用目录挂载时我会先看一眼容器默认用户。尤其是 Node.js 这类镜像，如果内部默认切到了 `node`，宿主机目录权限就得提前处理好：
 
-- 尽量保持容器内外用户 ID 的一致性。在 docker-compose.yml 文件中，可以指定容器以哪个用户/用户组运行：**user: "${UID}:${GID}"**
-- 在使用挂载目录时要考虑权限映射问题
-- 可以根据具体需求选择使用 user 指令或 Docker Volumes
+- 尽量保持容器内外用户 ID 一致，可以在 `docker-compose.yml` 里指定 **user: "${UID}:${GID}"**。
+- 使用挂载目录时，先考虑 UID/GID 映射问题。
+- 如果不想管这些细节，可以考虑 Docker Volumes，迁移麻烦一点，但权限问题少一点。
 
 ## 参考资料
 
