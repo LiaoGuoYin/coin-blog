@@ -24,7 +24,6 @@ pnpm-debug.log*
 .idea/
 .vscode/
 .wrangler/
-draft/
 
 # Localflare generated files
 .localflare/
