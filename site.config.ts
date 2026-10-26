@@ -66,5 +66,5 @@ export const siteConfig = {
   memosPerPage: 20,
 
   /** Memos API 地址(public memo only) */
-  memosApiUrl: "https://memo.liaoguoyin.com",
+  memosApiUrl: import.meta.env.DEV ? "/memos-api" : "https://memo.liaoguoyin.com",
 };

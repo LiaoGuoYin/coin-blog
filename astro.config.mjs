@@ -6,5 +6,14 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
+    server: {
+      proxy: {
+        '/memos-api': {
+          target: 'https://memo.liaoguoyin.com',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/memos-api/, ''),
+        },
+      },
+    },
   },
 });

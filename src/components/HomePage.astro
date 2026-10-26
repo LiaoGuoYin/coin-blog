@@ -887,7 +887,8 @@ const pageSize = siteConfig.postsPerPage;
   loadMoreBtn.addEventListener('click', loadMoreMemos);
 
   async function fetchMemoPage(pageToken: string): Promise<{ memos: Memo[]; pageToken: string }> {
-    const url = new URL(`${apiUrl}/api/v1/memos`);
+    // Base is needed because the dev API URL is a relative proxy path
+    const url = new URL(`${apiUrl}/api/v1/memos`, location.origin);
     url.searchParams.set('pageSize', String(PAGE_SIZE));
     if (pageToken) url.searchParams.set('pageToken', pageToken);
 
